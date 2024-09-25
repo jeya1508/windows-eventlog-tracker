@@ -11,7 +11,7 @@ import java.util.Properties;
 public class EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final String username = "jeyashree1358@gmail.com";
-    private final String password = "uhlp elwq xauz ykkg";
+    private final String password = "";
 
     public void sendEmail(String recipientEmail, String subject, String body) throws MessagingException {
         Properties properties = new Properties();
