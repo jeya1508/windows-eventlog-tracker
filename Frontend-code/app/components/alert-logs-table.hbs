@@ -1,0 +1,30 @@
+<table class="alert-table">
+  <thead>
+    <tr>
+      <th>Time Generated</th>
+      <th>Alert Information</th>
+      <th>Profile Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each @logs as |log|}}
+      <tr>
+        <td>{{this.formatTimestamp log.time_generated}}</td>
+        <td>
+          {{#if (eq log.event_type "Informational")}}
+            <span class="status-indicator informational"></span>
+          {{/if}}
+          {{#if (eq log.event_type "Warning")}}
+            <span class="status-indicator warning"></span>
+          {{/if}}
+          {{#if (eq log.event_type "Error")}}
+            <span class="status-indicator error"></span>
+          {{/if}}
+          Event category: {{log.event_category}}, Event_id: {{log.event_id}}, Source: {{log.source}}, Event_type: {{log.event_type}}, Hostname: {{log.hostname}}, Username: {{log.username}}
+        </td>
+        <td>{{log.profile_name}}</td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
+

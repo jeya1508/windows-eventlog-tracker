@@ -1,0 +1,136 @@
+.alert-heading {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .alert-table {
+    max-width: 1000px; 
+    margin: 50px auto; 
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  thead {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  thead th {
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+  }
+  
+  tbody tr {
+    border-bottom: 1px solid #ddd;
+  }
+  
+  tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  tbody td {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tbody td:first-child {
+    color: #555;
+  }
+  
+  tbody td:last-child {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  @media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+  
+    thead tr {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+  
+    tbody tr {
+      border: none;
+      margin-bottom: 10px;
+      background-color: #fff;
+    }
+  
+    tbody td {
+      border-bottom: 1px solid #ddd;
+      position: relative;
+      padding-left: 50%;
+    }
+  
+    tbody td:before {
+      content: attr(data-label);
+      position: absolute;
+      left: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  }
+  .status-indicator {
+    display: inline-block;
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%;
+    margin-right: 5px; 
+  }
+  .informational {
+    background-color:rgb(231, 126, 5); 
+  }
+  .warning {
+    background-color: rgb(255, 238, 0);
+  }
+  .error {
+    background-color: red; 
+  }
+
+.search-alert-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.search-input {
+  width: 60%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #797777;
+  border-radius: 4px;
+}
+
+.search-btn {
+  padding: 15px;
+  background-color: #00aeff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-btn i {
+  font-size: 18px;
+}
+
+.search-btn:hover {
+  background-color: #39d3ee;
+}

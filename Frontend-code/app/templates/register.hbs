@@ -1,0 +1,30 @@
+<div class="register-container">
+  <h2>Register</h2>
+  <form {{on "submit" this.registerUser}} class="register-form">
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input type="text" id="name" {{on "input" (fn this.updateField "name")}} placeholder="Enter your name" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" id="email" {{on "input" (fn this.updateField "email")}} placeholder="Enter your email" required>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" id="password" {{on "input" (fn this.updateField "password")}} placeholder="Enter your password" required>
+    </div>
+
+    <div class="form-group">
+      <label for="confirmPassword">Confirm Password:</label>
+      <input type="password" id="confirmPassword" {{on "input" (fn this.updateField "confirmPassword")}} placeholder="Confirm your password" required>
+    </div>
+
+    {{#if this.errorMessage}}
+      <div class="error-message">{{this.errorMessage}}</div>
+    {{/if}}
+
+    <button type="submit" class="btn-submit">Register</button>
+  </form>
+</div>

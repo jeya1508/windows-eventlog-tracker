@@ -1,0 +1,70 @@
+.dashboard-container {
+  overflow-x: auto;
+  margin: 100px auto;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.scrollable-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-behavior: smooth;
+}
+
+.scrollable-boxes::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scrollable-boxes::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.box {
+  min-width: 300px;
+  max-width: 300px;
+  height: 220px;
+  padding: 20px;
+  background-color: #e9e8e8;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 40%);
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.box h2 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.box p {
+  margin-bottom: 20px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.action-button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #0056b3;
+}
+@media (width <= 768px) {
+  .box {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}

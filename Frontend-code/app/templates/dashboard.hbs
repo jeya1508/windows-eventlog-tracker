@@ -1,0 +1,16 @@
+<div class="dashboard-container">
+  <div class="scrollable-boxes">
+    <div class="box search-box">
+      <h2>Search Logs</h2>
+      <p>Use the search feature to explore log entries and filter based on specific criteria.</p>
+      <button class="action-button" type="button" {{on "click" this.redirectToSearch}}>Go to Search</button>
+    </div>
+
+    <div class="box alert-box">
+      <h2>Alerts</h2>
+      <p>View or create alert profiles to be notified about important log entries.</p>
+      <button class="action-button" type="button" {{on "click" this.redirectToAlerts}}>Go to Alerts</button>
+    </div>
+    
+  </div>
+</div>

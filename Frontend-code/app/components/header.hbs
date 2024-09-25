@@ -1,0 +1,16 @@
+<header>
+  <h1>
+    <a href={{if this.isLoggedIn "/dashboard" "/"}} class="no-style-link">
+      EventTracker
+    </a>
+  </h1>
+
+  {{#if this.isLoggedIn}}
+    <div class="header-buttons">
+      {{#if this.isOnAlertsRoute}}
+        <button class="add-alert-button" type="button" {{on "click" this.goToAlertProfile}}>Add Alert Profile</button>
+      {{/if}}
+      <button class="logout-button" type="button" {{on "click" this.logout}}>Logout</button>
+    </div>
+  {{/if}}
+</header>

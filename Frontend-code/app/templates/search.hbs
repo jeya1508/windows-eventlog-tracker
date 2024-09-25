@@ -1,0 +1,53 @@
+<div class="search-container">
+  <h2>Event logs</h2>
+  <div class="search-bar">
+    <input type="text" placeholder="Search..." {{on "input" this.updateSearchTerm}} class="search-input">
+    <button class="search-btn" type="button" {{on "click" this.submitSearch}}>Search</button>
+    
+    <select class="search-category-dropdown" {{on "change" this.updateSearchCategory}}>
+      <option value="">Select Category</option>
+      <option value="event_id">Event ID</option>
+      <option value="username">Username</option>
+      <option value="hostname">Hostname</option>
+      <option value="time_generated">Time Generated</option>
+    </select>
+    
+    <select class="sort-order-dropdown" {{on "change" this.updateSortOrder}}>
+      <option value="">Sort Order</option>
+      <option value="asc">Ascending</option>
+      <option value="desc">Descending</option>
+    </select>
+    
+    <button class="sort-btn" type="button" {{on "click" this.applySorting}}>Sort</button>
+  </div>
+
+  <div class="results-container">
+    {{#if this.results.length}}
+      <ul class="results-list">
+        {{#each this.results as |result|}}
+          <li class="result-item">{{result}}</li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p class="no-results">No results available.</p>
+    {{/if}}
+  </div>
+
+  <div class="pagination-controls">
+    <button disabled={{eq this.currentPage 1}} type="button" {{on "click" this.goToPrevPage}}><i class="fa-solid fa-angle-left"></i></button>
+
+    <span>{{this.paginationInfo}}</span>
+
+    <button disabled={{eq this.currentPage this.totalPages}} type="button" {{on "click" this.goToNextPage}}><i class="fa-solid fa-angle-right"></i></button>
+
+    <select {{on "change" this.changePageSize}}>
+      <option value="5">5</option>
+      <option value="10" selected>10</option>
+      <option value="20">20</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+      <option value="75">75</option>
+      <option value="100">100</option>
+    </select>
+  </div>
+</div>
