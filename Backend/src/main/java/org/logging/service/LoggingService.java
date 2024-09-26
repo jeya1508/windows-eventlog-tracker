@@ -114,7 +114,7 @@ public class LoggingService {
             BulkRequest bulkRequest = bulkBuilder.build();
             BulkResponse response = client.bulk(bulkRequest);
 
-            System.out.println("Indexed " + response.items().size() + " documents");
+            logger.info("Indexed {} ",response.items().size() +" documents");
         } catch (IOException e) {
             logger.error("Error in ES {}",e.getMessage());
         } finally {

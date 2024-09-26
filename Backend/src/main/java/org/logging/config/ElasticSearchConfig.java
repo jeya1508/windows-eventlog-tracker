@@ -10,12 +10,14 @@ import org.elasticsearch.client.RestClientBuilder;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ElasticSearchConfig {
     private static final ElasticsearchClient client = createElasticsearchClient();
 
     private static RestClient restClient;
-
+    private static final Logger logger = LoggerFactory.getLogger(ElasticSearchConfig.class);
     public static ElasticsearchClient createElasticsearchClient() {
         String username = System.getenv("ELASTIC_USERNAME");
         String password = System.getenv("ELASTIC_PASSWORD");
@@ -43,9 +45,9 @@ public class ElasticSearchConfig {
     public static void closeClient() {
         try {
             restClient.close();
-            System.out.println("Elasticsearch client closed successfully.");
+            logger.info("Elasticsearch client closed successfully.");
         } catch (Exception e) {
-            System.err.println("Failed to close Elasticsearch client: " + e.getMessage());
+            logger.error("Failed to close Elasticsearch client: {} " ,e.getMessage());
         }
     }
 }

@@ -103,7 +103,7 @@ public class AlertRetrievalService {
                     .collect(Collectors.toList());
         }
         else{
-            throw new ValidationException("Criteria constraints not matched");
+            throw new ValidationException("Invalid query format. Query key and value should be separated only by =");
         }
     }
     public long getSearchedCount() {
