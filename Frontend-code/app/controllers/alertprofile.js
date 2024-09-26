@@ -31,17 +31,14 @@ export default class AlertprofileController extends Controller {
         later(() => this.router.transitionTo('alerts'), 2000);
       } else if (xhr.status === 400 || xhr.status === 500) {
         this.errorMessage = response.error || 'Failed to add alert profile';
-        this.successMessage = '';
       } else {
         this.errorMessage = 'An unexpected error occurred';
-        this.successMessage = '';
       }
     };
     xhr.onerror = () => {
       this.errorMessage = 'Alert profile addition failed';
     };
     xhr.send(JSON.stringify({ profileName, criteria, notifyEmail }));
-    this.errorMessage = '';
   }
   @action
   redirectToAlert() {

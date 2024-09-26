@@ -71,7 +71,6 @@
 .sort-btn:hover {
   background-color: #39d3ee;
 }
-
 .results-container {
   max-height: 400px;
   overflow-y: auto;

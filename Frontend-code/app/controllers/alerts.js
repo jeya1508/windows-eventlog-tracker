@@ -10,6 +10,7 @@ export default class AlertsController extends Controller {
   @tracked totalRecords = 0;
   @tracked totalPages = 0;
   @tracked searchAfter = [];
+  @tracked message = '';
 
   constructor() {
     super(...arguments);
@@ -31,19 +32,24 @@ export default class AlertsController extends Controller {
     xhr.withCredentials = true;
 
     xhr.onload = () => {
+      const data = JSON.parse(xhr.responseText);
+
       if (xhr.status === 200) {
         try {
-          const data = JSON.parse(xhr.responseText);
           this.logs = data.logs; 
           this.totalRecords = data.totalRecords;
           this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
           this.searchAfter = data.searchAfter || [];
+          this.message='';
 
         } catch (error) {
           console.error('Error parsing response:', error);
         }
-      } else {
-        console.error('Error fetching logs:', xhr.statusText);
+      }else if (xhr.status === 400 || xhr.status === 500) {
+        this.message = data.error || 'Failed to retrieve data';
+      }
+       else {
+        this.message = 'Error fetching logs';
       }
     };
 
