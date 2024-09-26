@@ -14,11 +14,11 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 public class ElasticSearchConfig {
     private static final ElasticsearchClient client = createElasticsearchClient();
 
-    private static RestClient restClient; // Get RestClient from ElasticsearchClient
+    private static RestClient restClient;
 
     public static ElasticsearchClient createElasticsearchClient() {
-        String username = "elastic";
-        String password = "elastic";
+        String username = System.getenv("ELASTIC_USERNAME");
+        String password = System.getenv("ELASTIC_PASSWORD");
 
         final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
@@ -42,7 +42,6 @@ public class ElasticSearchConfig {
     }
     public static void closeClient() {
         try {
-            // Close the RestClient to release resources
             restClient.close();
             System.out.println("Elasticsearch client closed successfully.");
         } catch (Exception e) {

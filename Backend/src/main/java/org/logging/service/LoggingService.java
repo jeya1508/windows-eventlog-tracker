@@ -22,10 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.logging.repository.AlertProfileRepository;
 import static org.logging.repository.ElasticSearchRepository.getLastIndexedRecordNumber;
@@ -36,6 +33,8 @@ public class LoggingService {
     private static final int BATCH_SIZE = 1000;
 
     public static void collectWindowsLogs(String name) {
+        Set<String> triggeredProfiles = new HashSet<>();
+
         List<Map<String, Object>> buffer = new ArrayList<>();
         try {
             String hostName = InetAddress.getLocalHost().getHostName();
@@ -70,10 +69,20 @@ public class LoggingService {
 
                 for (AlertProfile profile : alertProfiles) {
                     if (logMatchesCriteria(logData, profile.getCriteria())) {
-
                         Map<String, Object> alertLog = new HashMap<>(logData);
                         alertLog.put("profile_name", profile.getProfileName());
                         indexSingleLogToElasticSearch(alertLog, "alerts");
+
+                        if (!triggeredProfiles.contains(profile.getProfileName())) {
+                            String recipientEmail = profile.getNotifyEmail();
+                            if (recipientEmail != null && !recipientEmail.isEmpty()) {
+                                String emailSubject = "Alert Triggered: " + profile.getProfileName();
+                                String emailBody = "Alert was triggered for the profile "+profile.getProfileName()+"\n To view all alerts, visit http://localhost:4200/";
+                                EmailService.sendEmail(recipientEmail, emailSubject, emailBody);
+
+                                triggeredProfiles.add(profile.getProfileName());
+                            }
+                        }
                     }
                 }
 
@@ -91,9 +100,10 @@ public class LoggingService {
         }
     }
 
+
     public static RestClient establishESConnection(){
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials("elastic", "elastic"));
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(System.getenv("ELASTIC_USERNAME"), "ELASTIC_PASSWORD"));
 
         RestClientBuilder builder = RestClient.builder(new HttpHost("localhost", 9200))
                 .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
@@ -157,7 +167,7 @@ public class LoggingService {
 
             IndexResponse response = client.index(indexRequest);
 
-//            logger.info("Index {}",response.index());
+            logger.info("Index {}",response.index());
         } catch (IOException e) {
             logger.error("Elasticsearch indexing failed for index: {}. Error: {}", indexName, e.getMessage());
         } finally {
@@ -171,15 +181,11 @@ public class LoggingService {
     public static boolean logMatchesCriteria(Map<String, Object> logData, String criteria) {
         String[] keyValue = criteria.split("=");
         if (keyValue.length == 2) {
-            String key = keyValue[0].trim(); // Trim whitespace
-            String value = keyValue[1].trim(); // Trim whitespace
+            String key = keyValue[0].trim();
+            String value = keyValue[1].trim();
 
-            // Check if the logData contains the key
             if (logData.containsKey(key)) {
-                // Get the log value and convert it to String for comparison
-                String logValue = logData.get(key).toString().trim(); // Normalize the log value
-
-                // Case-insensitive comparison
+                String logValue = logData.get(key).toString().trim();
                 return logValue.equalsIgnoreCase(value);
             }
         }

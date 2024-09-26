@@ -23,7 +23,6 @@ import java.util.Map;
 @WebServlet("/v1/alert/add")
 public class AlertProfileServlet extends HttpServlet {
     private AlertProfileService alertService;
-    ObjectMapper objectMapper = new ObjectMapper();
 
     public AlertProfileServlet()
     {
@@ -38,7 +37,7 @@ public class AlertProfileServlet extends HttpServlet {
     }
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
         ObjectMapper objectMapper = new ObjectMapper();

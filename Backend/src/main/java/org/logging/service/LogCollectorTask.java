@@ -10,9 +10,7 @@ public class LogCollectorTask implements Runnable {
     public void run() {
         while (running) {
             try {
-//                System.out.println("In the running loop");
                 LoggingService.collectWindowsLogs("Application");
-//                LoggingService.collectWindowsLogs("System");
 
             } catch (Exception e) {
                 logger.error(e.getMessage());

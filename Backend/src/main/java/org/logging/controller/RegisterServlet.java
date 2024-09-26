@@ -26,7 +26,6 @@ import java.util.Map;
 public class RegisterServlet extends HttpServlet {
 
     private UserService userService;
-    ObjectMapper objectMapper = new ObjectMapper();
 
     public RegisterServlet() {
         super();
@@ -43,7 +42,7 @@ public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws  IOException {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
         ObjectMapper objectMapper = new ObjectMapper();
