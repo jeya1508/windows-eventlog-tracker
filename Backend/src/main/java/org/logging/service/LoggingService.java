@@ -5,17 +5,8 @@ import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
-import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import co.elastic.clients.transport.ElasticsearchTransport;
-import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.sun.jna.platform.win32.Advapi32Util;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
+import org.logging.config.ElasticSearchConfig;
 import org.logging.entity.AlertProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +22,7 @@ public class LoggingService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingService.class);
     private static final int BATCH_SIZE = 1000;
-
+    static ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
     public static void collectWindowsLogs(String name) {
         Set<String> triggeredProfiles = new HashSet<>();
 
@@ -68,7 +59,7 @@ public class LoggingService {
                 buffer.add(logData);
 
                 for (AlertProfile profile : alertProfiles) {
-                    if (logMatchesCriteria(logData, profile.getCriteria())) {
+                    if (elasticSearchUtil.logMatchesCriteria(logData, profile.getCriteria())) {
                         Map<String, Object> alertLog = new HashMap<>(logData);
                         alertLog.put("profile_name", profile.getProfileName());
                         indexSingleLogToElasticSearch(alertLog, "alerts");
@@ -99,27 +90,8 @@ public class LoggingService {
             logger.error("Error in collecting logs {}", e.getMessage());
         }
     }
-
-
-    public static RestClient establishESConnection(){
-        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(System.getenv("ELASTIC_USERNAME"), "ELASTIC_PASSWORD"));
-
-        RestClientBuilder builder = RestClient.builder(new HttpHost("localhost", 9200))
-                .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
-                        .setDefaultCredentialsProvider(credentialsProvider)
-                        .setDefaultRequestConfig(RequestConfig.custom()
-                                .setConnectTimeout(120000)
-                                .setSocketTimeout(120000)
-                                .build()));
-        return builder.build();
-
-    }
     public static void indexLogsToElasticSearch(List<Map<String, Object>> logs, String indexName) {
-        RestClient restClient = establishESConnection();
-        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-        ElasticsearchClient client = new ElasticsearchClient(transport);
-
+        ElasticsearchClient client = ElasticSearchConfig.createElasticsearchClient();
         try {
             BulkRequest.Builder bulkBuilder = new BulkRequest.Builder();
             for (Map<String, Object> logData : logs) {
@@ -147,16 +119,14 @@ public class LoggingService {
             logger.error("Error in ES {}",e.getMessage());
         } finally {
             try {
-                restClient.close();
-            } catch (IOException e) {
-                logger.error("I/O exception {}",e.getMessage());
+                ElasticSearchConfig.closeClient();
+            } catch (Exception e) {
+                logger.error("Exception while closing ES Client {}",e.getMessage());
             }
         }
     }
     public static void indexSingleLogToElasticSearch(Map<String, Object> log, String indexName) {
-        RestClient restClient = establishESConnection();
-        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-        ElasticsearchClient client = new ElasticsearchClient(transport);
+        ElasticsearchClient client = ElasticSearchConfig.createElasticsearchClient();
         try {
             String recordNumber = (String) log.get("record_number");
             IndexRequest<Map<String, Object>> indexRequest = IndexRequest.of(i -> i
@@ -172,24 +142,11 @@ public class LoggingService {
             logger.error("Elasticsearch indexing failed for index: {}. Error: {}", indexName, e.getMessage());
         } finally {
             try {
-                restClient.close();
-            } catch (IOException e) {
+                ElasticSearchConfig.closeClient();
+            } catch (Exception e) {
                 logger.error("Failed to close Elasticsearch client: {}", e.getMessage());
             }
         }
-    }
-    public static boolean logMatchesCriteria(Map<String, Object> logData, String criteria) {
-        String[] keyValue = criteria.split("=");
-        if (keyValue.length == 2) {
-            String key = keyValue[0].trim();
-            String value = keyValue[1].trim();
-
-            if (logData.containsKey(key)) {
-                String logValue = logData.get(key).toString().trim();
-                return logValue.equalsIgnoreCase(value);
-            }
-        }
-        return false;
     }
 
 

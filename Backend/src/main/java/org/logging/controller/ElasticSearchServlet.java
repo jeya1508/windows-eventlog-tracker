@@ -2,8 +2,12 @@ package org.logging.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.logging.config.ElasticSearchConfig;
 import org.logging.entity.LogInfo;
+import org.logging.repository.ElasticSearchRepository;
 import org.logging.service.ElasticSearchService;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import org.logging.service.ValidationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,18 +21,20 @@ public class ElasticSearchServlet extends HttpServlet {
 
     private ElasticSearchService elasticSearchService;
     private ObjectMapper objectMapper;
-
+    ValidationService validationService = new ValidationService();
+    private final ElasticSearchRepository elasticSearchRepository = new ElasticSearchRepository();
+    private static final Logger logger = LoggerFactory.getLogger(ElasticSearchServlet.class);
     @Override
     public void init() throws ServletException {
         ElasticsearchClient elasticsearchClient = ElasticSearchConfig.createElasticsearchClient();
-        this.elasticSearchService = new ElasticSearchService(elasticsearchClient);
+        this.elasticSearchService = new ElasticSearchService(elasticsearchClient,validationService);
         objectMapper = new ObjectMapper();
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String pathInfo = req.getPathInfo();
-        if (!isAuthenticated(req)) {
+        if (!validationService.isAuthenticated(req)) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -42,7 +48,7 @@ public class ElasticSearchServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error in retrieving logs from ES {}",e.getMessage());
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -56,7 +62,7 @@ public class ElasticSearchServlet extends HttpServlet {
         String sortOrder = req.getParameter("sortOrder");
 
         List<LogInfo> logs = elasticSearchService.getAllLogs(pageSize, searchAfter,sortBy,sortOrder);
-        long totalRecords = elasticSearchService.getTotalRecords();
+        long totalRecords = elasticSearchRepository.getTotalRecords("windows-event-logs");
 
         Map<String, Object> result = new HashMap<>();
         result.put("logs", logs);
@@ -64,7 +70,7 @@ public class ElasticSearchServlet extends HttpServlet {
         result.put("pageSize", pageSize);
 
         if (!logs.isEmpty()) {
-            LogInfo lastLog = logs.get(logs.size() - 1);
+            LogInfo lastLog = logs.getLast();
             result.put("searchAfter", lastLog.getSortValues());
         }
 
@@ -91,7 +97,7 @@ public class ElasticSearchServlet extends HttpServlet {
         result.put("pageSize", pageSize);
 
         if (!logs.isEmpty()) {
-            LogInfo lastLog = logs.get(logs.size() - 1);
+            LogInfo lastLog = logs.getLast();
             result.put("searchAfter", lastLog.getSortValues());
         }
 
@@ -99,11 +105,5 @@ public class ElasticSearchServlet extends HttpServlet {
         PrintWriter out = resp.getWriter();
         out.print(objectMapper.writeValueAsString(result));
         out.flush();
-    }
-
-
-    private boolean isAuthenticated(HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        return session != null && session.getAttribute("user") != null;
     }
 }

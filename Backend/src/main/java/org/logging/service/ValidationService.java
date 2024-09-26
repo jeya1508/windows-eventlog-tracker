@@ -1,4 +1,6 @@
 package org.logging.service;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.regex.Pattern;
 
 public class ValidationService {
@@ -22,6 +24,10 @@ public class ValidationService {
     }
     public boolean isNumeric(String str) {
         return str != null && str.matches("-?\\d+(\\.\\d+)?");
+    }
+    public boolean isAuthenticated(HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        return session != null && session.getAttribute("user") != null;
     }
 }
 

@@ -25,19 +25,19 @@ public class AlertRetrievalServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(AlertRetrievalServlet.class);
     private AlertRetrievalService alertRetrievalService;
     private ObjectMapper objectMapper;
+    ValidationService validationService = new ValidationService();
     ElasticSearchRepository elasticSearchRepository = new ElasticSearchRepository();
 
     @Override
     public void init() {
         ElasticsearchClient elasticsearchClient = ElasticSearchConfig.createElasticsearchClient();
-        ValidationService validationService = new ValidationService();
         this.alertRetrievalService = new AlertRetrievalService(elasticsearchClient,validationService);
         objectMapper = new ObjectMapper();
     }
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String pathInfo = req.getPathInfo();
-        if (!isAuthenticated(req)) {
+        if (!validationService.isAuthenticated(req)) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -129,9 +129,5 @@ public class AlertRetrievalServlet extends HttpServlet {
         }
 
         out.flush();
-    }
-    private boolean isAuthenticated(HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        return session != null && session.getAttribute("user") != null;
     }
 }

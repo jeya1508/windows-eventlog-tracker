@@ -19,7 +19,7 @@ public class AlertRetrievalService {
     public long SEARCH_COUNT = 0;
     private final ElasticsearchClient elasticsearchClient;
     private final ValidationService validationService;
-
+    ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
     public AlertRetrievalService(ElasticsearchClient elasticsearchClient,ValidationService validationService) {
         this.elasticsearchClient = elasticsearchClient;
         this.validationService = validationService;
@@ -65,7 +65,7 @@ public class AlertRetrievalService {
     }
     public List<AlertInfo> searchAlerts(String kqlQuery, int pageSize, String[] searchAfter) throws Exception {
         if(validationService.isValidCriteria(kqlQuery)) {
-            Query query = parseKqlToQuery(kqlQuery);
+            Query query = elasticSearchUtil.parseKqlToQuery(kqlQuery);
             SearchRequest searchRequest = SearchRequest.of(builder -> {
                 builder.index("alerts")
                         .query(query)
@@ -104,54 +104,6 @@ public class AlertRetrievalService {
         }
         else{
             throw new ValidationException("Criteria constraints not matched");
-        }
-    }
-
-    private Query parseKqlToQuery(String kqlQuery) {
-        if (kqlQuery.contains("=")) {
-            String[] parts = kqlQuery.split("=");
-            String field = parts[0].trim();
-            String value = parts[1].trim();
-
-            String fieldType = getFieldType(field);
-
-            switch (fieldType) {
-                case "keyword":
-                    return Query.of(q -> q
-                            .term(t -> t
-                                    .field(field + ".keyword")
-                                    .value(v -> v.stringValue(value))));
-                case "integer":
-                    return Query.of(q -> q
-                            .term(t -> t
-                                    .field(field)
-                                    .value(Integer.parseInt(value))));
-
-                case "date":
-                    long epochMillis = Long.parseLong(value) * 1000;
-                    return Query.of(q -> q
-                            .term(t -> t
-                                    .field(field)
-                                    .value(epochMillis)));
-                default:
-                    return null;
-            }
-        }
-        return null;
-    }
-
-    private String getFieldType(String field) {
-        if(field.equals("event_id") || field.equals("event_category"))
-        {
-            return "integer";
-        }
-        else if (field.equals("time_generated") || field.equals("time_written"))
-        {
-            return "date";
-
-        }
-        else {
-            return "keyword";
         }
     }
     public long getSearchedCount() {
