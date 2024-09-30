@@ -1,5 +1,6 @@
 package org.logging.repository;
 
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -11,9 +12,11 @@ import java.util.List;
 
 public class AlertProfileRepository {
     private MongoDatabase database;
+    private final MongoClient mongoClient;
     public AlertProfileRepository()
     {
-        this.database = MongoClients.create("mongodb://localhost:27017").getDatabase("logging");
+        this.mongoClient = MongoClients.create("mongodb://localhost:27017");
+        this.database = mongoClient.getDatabase("logging");
     }
     public void save(AlertProfile alertProfile) {
         MongoCollection<Document> collection = database.getCollection("alertProfile");
@@ -42,6 +45,12 @@ public class AlertProfileRepository {
 
         return alertProfiles;
     }
-
+    public void closeConnection()
+    {
+        if(mongoClient!= null)
+        {
+            mongoClient.close();
+        }
+    }
 
 }

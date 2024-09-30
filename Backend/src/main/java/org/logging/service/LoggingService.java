@@ -3,8 +3,6 @@ package org.logging.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
-import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
 import com.sun.jna.platform.win32.Advapi32Util;
 import org.logging.config.ElasticSearchConfig;
 import org.logging.entity.AlertProfile;
@@ -13,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.time.Instant;
 import java.util.*;
 
 import org.logging.repository.AlertProfileRepository;
@@ -21,19 +20,22 @@ import static org.logging.repository.ElasticSearchRepository.getLastIndexedRecor
 public class LoggingService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingService.class);
-    private static final int BATCH_SIZE = 1000;
-    static ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
+    private static final int LOGS_BATCH_SIZE = 2000;
+    private static final int ALERT_BATCH_SIZE = 1000;
+    private static final ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
+    private static final AlertProfileRepository alertProfileRepository = new AlertProfileRepository();
+
     public static void collectWindowsLogs(String name) {
         Set<String> triggeredProfiles = new HashSet<>();
 
         List<Map<String, Object>> buffer = new ArrayList<>();
+        List<Map<String, Object>> alertBuffer = new ArrayList<>();
+
         try {
             String hostName = InetAddress.getLocalHost().getHostName();
             String username = System.getProperty("user.name");
 
-            AlertProfileRepository alertProfileRepository = new AlertProfileRepository();
             List<AlertProfile> alertProfiles = alertProfileRepository.findAll();
-
             String lastIndexedRecordNumber = getLastIndexedRecordNumber();
 
             Advapi32Util.EventLogIterator it = new Advapi32Util.EventLogIterator(name);
@@ -62,13 +64,13 @@ public class LoggingService {
                     if (elasticSearchUtil.logMatchesCriteria(logData, profile.getCriteria())) {
                         Map<String, Object> alertLog = new HashMap<>(logData);
                         alertLog.put("profile_name", profile.getProfileName());
-                        indexSingleLogToElasticSearch(alertLog, "alerts");
+                        alertBuffer.add(alertLog);
 
                         if (!triggeredProfiles.contains(profile.getProfileName())) {
                             String recipientEmail = profile.getNotifyEmail();
                             if (recipientEmail != null && !recipientEmail.isEmpty()) {
                                 String emailSubject = "Alert Triggered: " + profile.getProfileName();
-                                String emailBody = "Alert was triggered for the profile "+profile.getProfileName()+"\n To view all alerts, visit http://localhost:4200/";
+                                String emailBody = "Alert was triggered for the profile " + profile.getProfileName() + "\n To view all alerts, visit http://localhost:4200/";
                                 EmailService.sendEmail(recipientEmail, emailSubject, emailBody);
 
                                 triggeredProfiles.add(profile.getProfileName());
@@ -77,30 +79,36 @@ public class LoggingService {
                     }
                 }
 
-                if (buffer.size() >= BATCH_SIZE) {
+                if (buffer.size() >= LOGS_BATCH_SIZE) {
                     indexLogsToElasticSearch(buffer, "windows-event-logs");
                     buffer.clear();
                 }
+                if (alertBuffer.size() >= ALERT_BATCH_SIZE) {
+                    indexLogsToElasticSearch(alertBuffer, "alerts");
+                    alertBuffer.clear();
+                }
             }
+
             if (!buffer.isEmpty()) {
                 indexLogsToElasticSearch(buffer, "windows-event-logs");
+            }
+
+            if (!alertBuffer.isEmpty()) {
+                indexLogsToElasticSearch(alertBuffer, "alerts");
             }
 
         } catch (Exception e) {
             logger.error("Error in collecting logs {}", e.getMessage());
         }
     }
+
     public static void indexLogsToElasticSearch(List<Map<String, Object>> logs, String indexName) {
         ElasticsearchClient client = ElasticSearchConfig.createElasticsearchClient();
         try {
             BulkRequest.Builder bulkBuilder = new BulkRequest.Builder();
             for (Map<String, Object> logData : logs) {
                 String recordNumber = (String) logData.get("record_number");
-                IndexRequest<Map<String, Object>> indexRequest = IndexRequest.of(i -> i
-                        .index(indexName)
-                        .id(recordNumber)
-                        .document(logData)
-                );
+
 
                 bulkBuilder.operations(op -> op
                         .index(idx -> idx
@@ -125,29 +133,9 @@ public class LoggingService {
             }
         }
     }
-    public static void indexSingleLogToElasticSearch(Map<String, Object> log, String indexName) {
-        ElasticsearchClient client = ElasticSearchConfig.createElasticsearchClient();
-        try {
-            String recordNumber = (String) log.get("record_number");
-            IndexRequest<Map<String, Object>> indexRequest = IndexRequest.of(i -> i
-                    .index(indexName)
-                    .id(recordNumber)
-                    .document(log)
-            );
-
-            IndexResponse response = client.index(indexRequest);
-
-            logger.info("Index {}",response.index());
-        } catch (IOException e) {
-            logger.error("Elasticsearch indexing failed for index: {}. Error: {}", indexName, e.getMessage());
-        } finally {
-            try {
-                ElasticSearchConfig.closeClient();
-            } catch (Exception e) {
-                logger.error("Failed to close Elasticsearch client: {}", e.getMessage());
-            }
-        }
+    private static String formatTimestamp(long timestamp) {
+        // Convert the long timestamp to the format required by the Event Log query (ISO 8601)
+        Instant instant = Instant.ofEpochMilli(timestamp);
+        return instant.toString(); // Adjust this based on required format
     }
-
-
 }

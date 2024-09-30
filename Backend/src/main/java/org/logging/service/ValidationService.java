@@ -19,7 +19,7 @@ public class ValidationService {
 
     public boolean isValidCriteria(String criteria)
     {
-        String criteriaRegex = "^[a-z_]+=[a-zA-Z0-9-]+$";
+        String criteriaRegex = "^[a-z_!]+=[a-zA-Z0-9-]+$";
         return !criteria.isEmpty() && Pattern.compile(criteriaRegex).matcher(criteria).matches();
     }
     public boolean isNumeric(String str) {

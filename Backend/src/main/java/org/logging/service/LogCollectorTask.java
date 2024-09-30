@@ -10,7 +10,7 @@ public class LogCollectorTask implements Runnable {
     public void run() {
         while (running) {
             try {
-                LoggingService.collectWindowsLogs("Application");
+                LoggingService.collectWindowsLogs("Security");
 
             } catch (Exception e) {
                 logger.error(e.getMessage());

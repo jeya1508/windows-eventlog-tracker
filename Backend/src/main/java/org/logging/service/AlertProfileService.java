@@ -19,7 +19,7 @@ public class AlertProfileService {
         if(!alertProfileRepository.existsByProfileName(alertProfile.getProfileName()))
         {
             if(!validationService.isValidCriteria(alertProfile.getCriteria())) {
-                throw new ValidationException("Criteria constraints not matched");
+                throw new ValidationException("Invalid criteria format");
             }
             else if(!validationService.isValidEmail(alertProfile.getNotifyEmail())){
                 throw new ValidationException("Invalid email format");

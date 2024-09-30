@@ -1,8 +1,6 @@
 package org.logging.service;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
-import co.elastic.clients.elasticsearch.core.CountRequest;
-import co.elastic.clients.elasticsearch.core.CountResponse;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -10,10 +8,13 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.logging.entity.LogInfo;
-import org.logging.exception.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
 
@@ -23,6 +24,8 @@ public class ElasticSearchService {
     private final ElasticsearchClient elasticsearchClient;
     private final ValidationService validationService;
     ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
+
+    private static final Logger logger = LoggerFactory.getLogger(ElasticSearchService.class);
     public ElasticSearchService(ElasticsearchClient elasticsearchClient, ValidationService validationService) {
         this.elasticsearchClient = elasticsearchClient;
         this.validationService = validationService;
@@ -73,7 +76,6 @@ public class ElasticSearchService {
 
 
     public List<LogInfo> searchLogs(String kqlQuery, int pageSize, String[] searchAfter) throws Exception {
-        if (validationService.isValidCriteria(kqlQuery)) {
             Query query = elasticSearchUtil.parseKqlToQuery(kqlQuery);
             SearchRequest searchRequest = SearchRequest.of(builder -> {
                 builder.index("windows-event-logs")
@@ -110,10 +112,6 @@ public class ElasticSearchService {
                         return logInfo;
                     })
                     .collect(Collectors.toList());
-        }
-        else{
-            throw new ValidationException("Invalid query format. Query key and value should be separated only by =");
-        }
     }
     public long getSearchedCount() {
         return SEARCH_COUNT;

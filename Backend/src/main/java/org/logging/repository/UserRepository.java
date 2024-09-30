@@ -1,4 +1,5 @@
 package org.logging.repository;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoClients;
@@ -9,10 +10,11 @@ import java.util.Optional;
 
 public class UserRepository {
 
-    private MongoDatabase database;
-
+    private final MongoDatabase database;
+    private final MongoClient mongoClient;
     public UserRepository() {
-        this.database = MongoClients.create("mongodb://localhost:27017").getDatabase("logging");
+        this.mongoClient = MongoClients.create("mongodb://localhost:27017");
+        this.database = mongoClient.getDatabase("logging");
     }
 
     public boolean existsByEmail(String email) {
@@ -41,6 +43,11 @@ public class UserRepository {
             return Optional.of(user);
         } else {
             return Optional.empty();
+        }
+    }
+    public void closeConnection() {
+        if (mongoClient != null) {
+            mongoClient.close();
         }
     }
 }

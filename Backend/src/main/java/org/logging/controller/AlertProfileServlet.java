@@ -8,6 +8,8 @@ import org.logging.repository.AlertProfileRepository;
 import org.logging.service.AlertProfileService;
 import org.logging.service.ValidationService;
 import org.logging.to.AlertProfileTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -23,6 +25,8 @@ import java.util.Map;
 @WebServlet("/v1/alert/add")
 public class AlertProfileServlet extends HttpServlet {
     private AlertProfileService alertService;
+    private AlertProfileRepository alertProfileRepository;
+    private static final Logger logger = LoggerFactory.getLogger(AlertProfileServlet.class);
 
     public AlertProfileServlet()
     {
@@ -31,7 +35,7 @@ public class AlertProfileServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        AlertProfileRepository alertProfileRepository = new AlertProfileRepository();
+        alertProfileRepository = new AlertProfileRepository();
         ValidationService validationService = new ValidationService();
         alertService = new AlertProfileService(alertProfileRepository,validationService);
     }
@@ -82,5 +86,11 @@ public class AlertProfileServlet extends HttpServlet {
         }
         out.flush();
         out.close();
+    }
+    @Override
+    public void destroy()
+    {
+        alertProfileRepository.closeConnection();
+        logger.info("MongoDB connection closed successfully");
     }
 }

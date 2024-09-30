@@ -8,6 +8,8 @@ import org.logging.service.UserService;
 import org.logging.service.ValidationService;
 import org.logging.to.AuthResponseTO;
 import org.logging.to.SignInTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,11 +23,13 @@ public class LoginServlet extends HttpServlet {
 
     private UserService userService;
     private ObjectMapper objectMapper = new ObjectMapper();
+    private UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(LoginServlet.class);
 
     @Override
     public void init() throws ServletException {
         super.init();
-        UserRepository userRepository = new UserRepository();
+         userRepository = new UserRepository();
         ValidationService validationService = new ValidationService();
 
         userService = new UserService(userRepository, validationService);
@@ -67,5 +71,11 @@ public class LoginServlet extends HttpServlet {
 
         out.flush();
         out.close();
+    }
+    @Override
+    public void destroy()
+    {
+        userRepository.closeConnection();
+        logger.info("Mongo connection closed successfully");
     }
 }

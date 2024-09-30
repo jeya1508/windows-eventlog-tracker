@@ -44,7 +44,7 @@ public class ElasticSearchServlet extends HttpServlet {
                 handleGetAllLogs(req, resp);
             } else if ("/search".equals(pathInfo)) {
                 handleSearchLogs(req, resp);
-            } else {
+            }else {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
@@ -105,5 +105,12 @@ public class ElasticSearchServlet extends HttpServlet {
         PrintWriter out = resp.getWriter();
         out.print(objectMapper.writeValueAsString(result));
         out.flush();
+    }
+
+    @Override
+    public void destroy()
+    {
+        ElasticSearchConfig.closeClient();
+        logger.info("ES connection closed successfully");
     }
 }
