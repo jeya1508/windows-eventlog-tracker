@@ -1,17 +1,8 @@
 .alert-heading {
     font-size: 24px;
-    color: #333;
+    color: #333333;
     margin-bottom: 20px;
   }
-  .message {
-    margin-top: 10px;
-    color: red;
-    font-size: 14px;
-    display: flex;
-    justify-content: center; 
-    align-items: center;  
-    text-align: center;  
-}
   .alert-table {
     max-width: 1000px; 
     margin: 50px auto; 
@@ -106,39 +97,97 @@
   .error {
     background-color: red; 
   }
-
-.search-alert-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.search-input {
-  width: 60%;
-  padding: 12px;
-  font-size: 16px;
-  border: 1px solid #797777;
-  border-radius: 4px;
-}
-
-.search-btn {
-  padding: 15px;
-  background-color: #00aeff;
+  .alert-filter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; 
+    margin-bottom: 20px;
+  }
+  
+  .alert-filter select {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-shrink: 0; 
+  }
+  
+  .filter-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .filter-btn:hover {
+    background-color: #0056b3; 
+  }
+ /* Export As Button */
+.export-as-btn {
+  position: relative;
+  display: inline-block;
+  padding: 12px 20px;
+  font-size: 14px;
+  background-color: #06c069;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-left: 10px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
 }
 
-.search-btn i {
+.export-as-btn:hover {
+  background-color:  #049665;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.export-as-btn:focus {
+  outline: none;
+  background-color: #06c069;
+  box-shadow: 0 0 5px rgba(0, 255, 145, 0.5);
+}
+
+.export-as-btn i {
+  margin-left: 8px;
   font-size: 18px;
 }
 
-.search-btn:hover {
-  background-color: #39d3ee;
+.export-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1;
+  background-color: white;
+  min-width: 140px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 4px 0;
+  font-size: 14px;
+  border: 1px solid #ddd;
 }
+.export-as-btn:hover .export-dropdown-menu {
+  display: block;
+}
+.export-dropdown-menu option {
+  color: #333;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: block;
+  transition: background-color 0.3s ease;
+}
+
+.export-dropdown-menu option:hover {
+  background-color: #f1f1f1;
+  color: #007bff;
+}
+
+
+  

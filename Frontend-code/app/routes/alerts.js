@@ -6,6 +6,7 @@ export default class AlertsRoute extends Route {
     setupController(controller) {
         super.setupController(...arguments);
         controller.fetchLogs();
+        controller.fetchAlertProfiles();
     }
     beforeModel() {
         if (!this.session.isLoggedIn) {

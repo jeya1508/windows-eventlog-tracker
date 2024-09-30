@@ -1,12 +1,36 @@
 <h2 class="alert-heading">Alert Logs</h2>
 
-<div class="search-alert-bar">
-  <input type="text" placeholder="Search alerts" {{on "input" this.updateSearchTerm}} class="search-input">
-  <button class="search-btn" type="button" {{on "click" this.submitSearch}}>Search</button>
+<div class="alert-filter">
+  <select class="filter-category" {{on "change" this.changeAlertCategory}}>
+    <option value="" selected>Select category</option>
+    <option value="profile_name">Profile Name</option>
+  </select>
+
+  <select class="equal-condition-dropdown" {{on "change" this.changeCondition}}>
+    <option value="" selected>Select Condition</option>
+    <option value="equals">Equals</option>
+    <option value="notequal">Not equals</option>
+  </select>
+
+  <select {{on "change" this.changeProfileName}} value={{this.profileName}}>
+    <option value="" selected>Select Profile</option>
+    {{#each this.alertProfiles as |profileName|}}
+      <option value={{profileName}}>{{profileName}}</option>
+    {{/each}}
+  </select>
+
+  <button class="filter-btn" type="button" {{on "click" this.applyFiltering}}>Filter</button>
+  
+
+  <button class="export-as-btn">
+    <i class="fa-solid fa-file-export"></i> Export as 
+    <span class="dropdown-arrow"></span>
+
+    <div class="export-dropdown-menu">
+      <option value="csv"{{on "click" this.exportAsCSV}}>CSV</option>
+    </div>
+  </button>
 </div>
-{{#if this.message}}
-      <div class="message">{{this.message}}</div>
-{{/if}}
 
 {{#if this.logs.length}}
   <AlertLogsTable @logs={{this.logs}} />
