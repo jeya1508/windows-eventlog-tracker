@@ -13,8 +13,10 @@ export default class AlertsController extends Controller {
   @tracked profileName = '';
   @tracked totalPages = 0;
   @tracked searchAfter = [];
-  @tracked alertProfiles = []; 
-
+  @tracked alertProfiles = [];
+  @tracked isPopupVisible = false;
+  @tracked exportHistoryData = [];
+  
   constructor() {
     super(...arguments);
   }
@@ -22,30 +24,34 @@ export default class AlertsController extends Controller {
   constructSearchTerm() {
     let condition = '';
     if (this.condition === 'equals') {
-      condition = '=';  
+      condition = '=';
     } else if (this.condition === 'notequal') {
-      condition = '!='; 
+      condition = '!=';
     }
 
     const searchTerm = `${this.alertCategory}${condition}${this.profileName}`;
-    return encodeURIComponent(searchTerm).replace(/!/g, "%21");
+    return encodeURIComponent(searchTerm).replace(/!/g, '%21');
   }
 
   fetchLogs(encodedSearchTerm) {
     let endpoint = encodedSearchTerm
       ? `search?query=${encodedSearchTerm}&page=${this.currentPage - 1}&pageSize=${this.pageSize}`
       : `all?page=${this.currentPage - 1}&pageSize=${this.pageSize}`;
-    
+
     if (this.searchAfter.length > 0 && this.currentPage > 1) {
       const searchAfterString = this.searchAfter.join(',');
       endpoint += `&searchAfter=${encodeURIComponent(searchAfterString)}`;
     }
-  
+
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', `http://localhost:8500/servletlog/v1/alert/${endpoint}`, true);
+    xhr.open(
+      'GET',
+      `http://localhost:8500/servletlog/v1/alert/${endpoint}`,
+      true,
+    );
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
-  
+
     xhr.onload = () => {
       const data = JSON.parse(xhr.responseText);
       if (xhr.status === 200) {
@@ -61,25 +67,29 @@ export default class AlertsController extends Controller {
         console.error('Error fetching logs');
       }
     };
-  
+
     xhr.onerror = () => {
       console.error('Network error while fetching logs');
     };
-  
+
     xhr.send();
   }
-  
+
   fetchAlertProfiles() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://localhost:8500/servletlog/v1/alert/allProfiles', true);
+    xhr.open(
+      'GET',
+      'http://localhost:8500/servletlog/v1/alert/allProfiles',
+      true,
+    );
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
-  
+
     xhr.onload = () => {
       if (xhr.status === 200) {
         try {
           const data = JSON.parse(xhr.responseText);
-          this.alertProfiles = data.profileNames || []; 
+          this.alertProfiles = data.profileNames || [];
         } catch (error) {
           console.error('Error parsing alert profiles:', error);
         }
@@ -87,11 +97,11 @@ export default class AlertsController extends Controller {
         console.error('Error fetching alert profiles');
       }
     };
-  
+
     xhr.onerror = () => {
       console.error('Network error while fetching alert profiles');
     };
-  
+
     xhr.send();
   }
 
@@ -104,7 +114,9 @@ export default class AlertsController extends Controller {
   async submitSearch() {
     this.currentPage = 1;
     this.searchAfter = [];
-    this.fetchLogs(this.searchTerm ? encodeURIComponent(this.searchTerm) : null);
+    this.fetchLogs(
+      this.searchTerm ? encodeURIComponent(this.searchTerm) : null,
+    );
   }
 
   @action
@@ -112,30 +124,36 @@ export default class AlertsController extends Controller {
     this.pageSize = event.target.value;
     this.currentPage = 1;
     this.searchAfter = [];
-    this.fetchLogs(this.searchTerm ? encodeURIComponent(this.searchTerm) : null);
+    this.fetchLogs(
+      this.searchTerm ? encodeURIComponent(this.searchTerm) : null,
+    );
   }
 
   @action
   goToNextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.fetchLogs(this.searchTerm ? encodeURIComponent(this.searchTerm) : null);
+      this.fetchLogs(
+        this.searchTerm ? encodeURIComponent(this.searchTerm) : null,
+      );
     }
   }
-  
+
   @action
   goToPrevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.fetchLogs(this.searchTerm ? encodeURIComponent(this.searchTerm) : null);
+      this.fetchLogs(
+        this.searchTerm ? encodeURIComponent(this.searchTerm) : null,
+      );
     }
   }
-  
+
   @action
   applyFiltering() {
-    this.searchTerm = this.constructSearchTerm(); 
+    this.searchTerm = this.constructSearchTerm();
     this.currentPage = 1;
-    this.fetchLogs(this.searchTerm); 
+    this.fetchLogs(this.searchTerm);
   }
 
   @action
@@ -165,11 +183,15 @@ export default class AlertsController extends Controller {
     console.log('Exporting as CSV...');
 
     const xhr = new XMLHttpRequest();
-    const searchTerm = this.constructSearchTerm(); 
+    const searchTerm = this.constructSearchTerm();
 
-    xhr.open('GET', `http://localhost:8500/servletlog/v1/alert/export/csv?query=${searchTerm}`, true);
+    xhr.open(
+      'GET',
+      `http://localhost:8500/servletlog/v1/alert/export/csv?query=${searchTerm}`,
+      true,
+    );
     xhr.withCredentials = true;
-    xhr.responseType = 'blob'; 
+    xhr.responseType = 'blob';
 
     xhr.onload = () => {
       if (xhr.status === 200) {
@@ -178,7 +200,7 @@ export default class AlertsController extends Controller {
         const link = document.createElement('a');
         const url = window.URL.createObjectURL(blob);
         link.href = url;
-        link.download = 'exported_alerts.csv'; 
+        link.download = 'exported_alerts.csv';
 
         document.body.appendChild(link);
         link.click();
@@ -192,6 +214,85 @@ export default class AlertsController extends Controller {
       console.error('Network error occurred while exporting CSV.');
     };
 
+    xhr.send();
+  }
+
+  @action
+  async exportHistory() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://localhost:8500/servletlog/v1/export/history', true);
+    xhr.withCredentials = true;
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        this.exportHistoryData = data.map((item) => ({
+          fileName: item.fileName.split('/').pop(),
+          preSignedUrl: item.preSignedUrl,
+        }));
+
+        this.isPopupVisible = true;
+      } else {
+        console.error('Error fetching export history:', xhr.statusText);
+      }
+    };
+
+    xhr.onerror = () => {
+      console.error('Error fetching export history:', xhr.statusText);
+    };
+
+    xhr.send();
+  }
+
+  @action
+  closePopup() {
+    this.isPopupVisible = false;
+  }
+  @action
+  clearCSVFile(filename) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://localhost:8500/servletlog/v1/export/delete', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.withCredentials = true;
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        console.log('File deleted successfully');
+        this.set(
+          'exportHistoryData',
+          this.exportHistoryData.filter((file) => file.fileName !== filename),
+        );
+      }
+    };
+    xhr.onerror = () => {
+      console.error('Error in deleting file', xhr.statusText);
+    };
+    const payload = {
+      fileName: filename,
+    };
+
+    xhr.send(JSON.stringify(payload));
+  }
+  @action
+  clearAllFiles() {
+    const xhr = new XMLHttpRequest();
+    xhr.open(
+      'POST',
+      'http://localhost:8500/servletlog/v1/export/delete/all',
+      true,
+    );
+    xhr.withCredentials = true;
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        console.log('All export history files deleted');
+        this.set('exportHistoryData', []);
+      }
+    };
+    xhr.onerror = () => {
+      console.error(
+        'Error while clearing all the files from export history',
+        xhr.statusText,
+      );
+    };
     xhr.send();
   }
 }

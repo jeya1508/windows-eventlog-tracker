@@ -62,6 +62,7 @@
 .action-button:hover {
   background-color: #0056b3;
 }
+
 @media (width <= 768px) {
   .box {
     min-width: 100%;

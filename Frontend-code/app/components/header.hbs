@@ -8,9 +8,15 @@
   {{#if this.isLoggedIn}}
     <div class="header-buttons">
       {{#if this.isOnAlertsRoute}}
-        <button class="add-alert-button" type="button" {{on "click" this.goToAlertProfile}}>Add Alert Profile</button>
+        <div class="dropdown">
+          <button class="dropbtn" type="button">Alert Profiles</button>
+          <div class="dropdown-content">
+            <a href="" {{on "click" this.goToAlertProfile}}><i class="fa-solid fa-plus"></i> Add</a>
+            <a href="" {{on "click" this.manageAlertProfiles}}><i class="fa-solid fa-gear"></i> Manage</a>
+          </div>
+        </div>
       {{/if}}
       <button class="logout-button" type="button" {{on "click" this.logout}}>Logout</button>
-    </div>
+  </div>
   {{/if}}
 </header>

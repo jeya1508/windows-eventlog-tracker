@@ -1,0 +1,87 @@
+.table-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    margin-top: 20px;
+  }
+  
+  .alert-profiles-table {
+    width: 75%; 
+    border-collapse: collapse; 
+    margin: 0;
+  }
+  
+  .alert-profiles-table th {
+    padding: 10px; 
+    text-align: left; 
+    background-color: #79ee0be8;
+    border: 1px solid #ddd;
+    color: black; 
+  }
+  .alert-profiles-table td{
+    padding: 10px; 
+    text-align: left; 
+    border: 1px solid #ddd;
+    color: black; 
+
+  }
+  .alert-profiles-table td:first-child{
+    font-weight: bold;
+  }
+  .alert-profiles-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .alert-profiles-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  .edit-button, .delete-button {
+    padding: 10px 15px; 
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; 
+    transition: background-color 0.3s ease; 
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px; 
+  }
+  
+  .edit-button {
+    background-color: #007bff; 
+    color: white; 
+  }
+  
+  .edit-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .delete-button {
+    background-color: #dc3545; 
+    color: white; 
+  }
+  
+  .delete-button:hover {
+    background-color: #c82333; 
+  }
+  
+  
+.back-button-container {
+    text-align: center; 
+    margin-top: 20px; 
+  }
+  
+  .back-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer; 
+    font-size: 14px; 
+  }
+  
+  .back-button:hover {
+    background-color: #0056b3;
+  }

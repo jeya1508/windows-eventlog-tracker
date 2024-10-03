@@ -13,4 +13,5 @@ Router.map(function () {
   this.route('search');
   this.route('alerts');
   this.route('alertprofile');
+  this.route('manageAlert');
 });

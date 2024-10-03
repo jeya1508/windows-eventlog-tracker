@@ -136,5 +136,4 @@ export default class SearchController extends Controller {
     const end = Math.min(this.currentPage * this.pageSize, this.totalRecords);
     return `${start} - ${end} of ${this.totalRecords}`;
   }
- 
 }

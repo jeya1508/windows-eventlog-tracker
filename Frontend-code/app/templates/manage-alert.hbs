@@ -1,0 +1,35 @@
+<div class="table-container">
+  <h2>Manage Alert Profiles</h2>
+  <table class="alert-profiles-table">
+    <thead>
+      <tr>
+        <th>Profile Name</th>
+        <th>Criteria</th>
+        <th>Notify Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each this.alertProfiles as |profile|}}
+        <tr>
+          <td>{{profile.profileName}}</td>
+          <td>{{profile.criteria}}</td>
+          <td>{{profile.notifyEmail}}</td>
+          <td>
+            <button class="edit-button" {{on "click" (fn this.editProfile profile)}}><i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="delete-button" {{on "click" (fn this.deleteProfile profile)}}><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      {{else}}
+        <tr>
+          <td colspan="4">No alert profiles found.</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  <div class="back-button-container">
+    <button class="back-button" {{on "click" this.redirectToAlert}}>
+      Back 
+    </button>
+  </div>
+</div>
