@@ -10,6 +10,8 @@ import org.logging.entity.AlertProfile;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mongodb.client.model.Filters.eq;
+
 public class AlertProfileRepository {
     private MongoDatabase database;
     private final MongoClient mongoClient;
@@ -44,6 +46,22 @@ public class AlertProfileRepository {
         );
 
         return alertProfiles;
+    }
+    public void updateProfile(AlertProfile updatedProfile) {
+        MongoCollection<Document> collection = database.getCollection("alertProfile");
+
+        Document query = new Document("profileName", updatedProfile.getProfileName());
+        Document updateFields = new Document()
+                .append("criteria", updatedProfile.getCriteria())
+                .append("notifyEmail", updatedProfile.getNotifyEmail());
+
+        Document updateOperation = new Document("$set", updateFields);
+
+        collection.updateOne(query, updateOperation);
+    }
+    public void deleteByProfileName(String profileName) {
+        MongoCollection<Document> collection = database.getCollection("alertProfile");
+        collection.deleteOne(eq("profileName", profileName));
     }
     public void closeConnection()
     {

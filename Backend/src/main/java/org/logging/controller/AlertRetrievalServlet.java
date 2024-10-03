@@ -1,12 +1,14 @@
 package org.logging.controller;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.logging.config.ElasticSearchConfig;
 import org.logging.entity.AlertInfo;
 import org.logging.exception.ValidationException;
 import org.logging.repository.ElasticSearchRepository;
 import org.logging.service.AlertRetrievalService;
+import org.logging.service.S3Service;
 import org.logging.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +17,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +34,7 @@ public class AlertRetrievalServlet extends HttpServlet {
     private ObjectMapper objectMapper;
     ValidationService validationService = new ValidationService();
     ElasticSearchRepository elasticSearchRepository = new ElasticSearchRepository();
+    S3Service s3Service = new S3Service("event-log-bucket-1");
 
     @Override
     public void init() {
@@ -41,6 +45,7 @@ public class AlertRetrievalServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String pathInfo = req.getPathInfo();
+        logger.info("The path is {}",pathInfo);
         if (!validationService.isAuthenticated(req)) {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -71,34 +76,36 @@ public class AlertRetrievalServlet extends HttpServlet {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error in processing request {}",e.getMessage());
+            logger.error("Error in processing GET request {}",e.getMessage());
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
     private void handleExportAsCSV(HttpServletRequest req, HttpServletResponse resp) {
+        String timeFormat = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(Instant.now().atZone(ZoneId.systemDefault()));
         String kqlQuery = req.getParameter("query");
-        String fileName = "exported_alerts.csv";
+        String fileName = "exported_alerts_" + timeFormat + ".csv";
+        String localFilePath = "C:\\Users\\hp\\Downloads" +fileName;
 
-        resp.setContentType("text/csv");
-        resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-
-        try (PrintWriter writer = resp.getWriter()) {
+        try (FileWriter fileWriter = new FileWriter(localFilePath)) {
             List<AlertInfo> alerts = alertRetrievalService.getAlerts(kqlQuery);
-            writer.write("Report Name: Alert Report\n");
-            writer.write("Domain Name: All domain\n");
-            writer.write("Number of records: "+alerts.size()+"\n");
-            writer.write("Generated at: "+Instant.now()+"\n\n");
+            fileWriter.write("Report Name: Alert Report\n");
+            fileWriter.write("Domain Name: All domain\n");
+            fileWriter.write("Number of records: " + alerts.size() + "\n");
+            fileWriter.write("Generated at: " + Instant.now() + "\n\n");
 
+            fileWriter.write("Profile Name,Source,Event type,Event id,Time generated\n");
 
-            writer.write("Profile Name,Source,Event type,Event id,Time generated\n");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    .withZone(ZoneId.systemDefault());
+
             for (AlertInfo alert : alerts) {
                 long epochSeconds = Long.parseLong(alert.getTime_generated());
                 String timestamp = Instant.ofEpochSecond(epochSeconds)
                         .atZone(ZoneId.systemDefault())
                         .format(formatter);
 
-                writer.write(String.format("%s,%s,%s,%s,%s\n",
+                fileWriter.write(String.format("%s,%s,%s,%s,%s\n",
                         alert.getProfile_name(),
                         alert.getSource(),
                         alert.getEvent_type(),
@@ -106,14 +113,26 @@ public class AlertRetrievalServlet extends HttpServlet {
                         timestamp
                 ));
             }
+            fileWriter.flush();
+        } catch (Exception e) {
+            System.err.println("Error writing CSV file: " + e.getMessage());
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        }
+        String s3Key = "exports/" + fileName;
+        s3Service.uploadCSVToS3(localFilePath,s3Key);
 
+        resp.setContentType("text/csv");
+        resp.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+
+        try (PrintWriter writer = resp.getWriter()) {
+            Files.lines(Paths.get(localFilePath)).forEach(writer::println);
             writer.flush();
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error writing CSV to response: {}" , e.getMessage());
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+        new File(localFilePath).delete();
     }
 
     private void handleGetAllProfiles(HttpServletRequest req, HttpServletResponse resp) throws Exception {

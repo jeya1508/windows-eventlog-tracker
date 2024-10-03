@@ -24,6 +24,7 @@ public class ElasticSearchServlet extends HttpServlet {
     ValidationService validationService = new ValidationService();
     private final ElasticSearchRepository elasticSearchRepository = new ElasticSearchRepository();
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchServlet.class);
+
     @Override
     public void init() throws ServletException {
         ElasticsearchClient elasticsearchClient = ElasticSearchConfig.createElasticsearchClient();

@@ -77,7 +77,6 @@ public class ElasticSearchUtil {
     }
 
     String getFieldType(String field) {
-        // Identifying field types based on the field name
         if (field.equals("event_id") || field.equals("event_category")) {
             return "integer";
         } else if (field.equals("time_generated") || field.equals("time_written")) {

@@ -40,24 +40,5 @@ public class ElasticSearchRepository {
         CountResponse countResponse = client.count(countRequest);
         return countResponse.count();
     }
-    public static String getLastIndexedTimeGenerated() {
-        try {
-            SearchResponse<Map> searchResponse = client.search(s -> s
-                            .index("windows-event-logs")
-                            .sort(sort -> sort.field(f -> f.field("time_generated").order(SortOrder.Desc))) // Sort by time_generated in descending order
-                            .size(1),
-                    Map.class
-            );
 
-            if (!searchResponse.hits().hits().isEmpty()) {
-                Map<String, Object> source = searchResponse.hits().hits().get(0).source();
-                return (String) source.get("time_generated"); // Return the time_generated field
-            }
-        } catch (IOException e) {
-            logger.error("Elasticsearch search failed", e);
-        } catch (ElasticsearchException e) {
-            logger.error("Elasticsearch exception for time: {} ", e.getMessage());
-        }
-        return null;
-    }
 }

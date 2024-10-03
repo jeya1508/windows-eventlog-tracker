@@ -3,6 +3,7 @@ package org.logging.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.logging.entity.AlertProfile;
 import org.logging.exception.ValidationException;
 import org.logging.repository.AlertProfileRepository;
 import org.logging.service.AlertProfileService;
@@ -20,9 +21,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-@WebServlet("/v1/alert/add")
+@WebServlet("/v1/alert/profile/*")
 public class AlertProfileServlet extends HttpServlet {
     private AlertProfileService alertService;
     private AlertProfileRepository alertProfileRepository;
@@ -38,27 +40,50 @@ public class AlertProfileServlet extends HttpServlet {
         alertProfileRepository = new AlertProfileRepository();
         ValidationService validationService = new ValidationService();
         alertService = new AlertProfileService(alertProfileRepository,validationService);
+
+    }
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        handleAddOrEditProfile(request, response, true);
     }
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        handleAddOrEditProfile(request, response, false);
+    }
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String profileName = extractProfileNameFromPath(request);
+        PrintWriter printWriter = response.getWriter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        if (profileName == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Profile doesn't exist");
+            printWriter.write(objectMapper.writeValueAsString(error));
+            return;
+        }
         response.setContentType("application/json");
+        String result = alertService.deleteProfile(profileName);
+        Map<String, String> successResponse = new HashMap<>();
+        successResponse.put("message", result);
+        response.setStatus(HttpServletResponse.SC_OK);
+        printWriter.write(objectMapper.writeValueAsString(successResponse));
+    }
+    private void handleAddOrEditProfile(HttpServletRequest request, HttpServletResponse response, boolean isEdit) throws IOException {
         PrintWriter out = response.getWriter();
         ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            StringBuilder json = new StringBuilder();
-            String line;
-            BufferedReader reader = request.getReader();
-            while ((line = reader.readLine()) != null) {
-                json.append(line);
-            }
-            JsonNode jsonNode = objectMapper.readTree(json.toString());
+        try{
+            response.setContentType("application/json");
+            JsonNode jsonNode = objectMapper.readTree(request.getReader());
+
             String profileName = jsonNode.get("profileName").asText();
             String criteria = jsonNode.get("criteria").asText();
             String notifyEmail = jsonNode.get("notifyEmail").asText();
 
-            AlertProfileTO alertProfileTO = new AlertProfileTO(profileName,criteria,notifyEmail);
-            String result= alertService.addProfile(alertProfileTO);
+            AlertProfileTO alertProfileTO = new AlertProfileTO(profileName, criteria, notifyEmail);
+            String result = isEdit ? alertService.updateProfile(alertProfileTO) : alertService.addProfile(alertProfileTO);
+
             Map<String, String> successResponse = new HashMap<>();
             successResponse.put("message", result);
             response.setStatus(HttpServletResponse.SC_OK);
@@ -86,6 +111,29 @@ public class AlertProfileServlet extends HttpServlet {
         }
         out.flush();
         out.close();
+    }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        PrintWriter out = resp.getWriter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            List<AlertProfile> result = alertService.getAllProfiles();
+            Map<String, Object> successResponse = new HashMap<>();
+            successResponse.put("message", result);
+            resp.setStatus(HttpServletResponse.SC_OK);
+            out.write(objectMapper.writeValueAsString(successResponse));
+        }
+        catch (Exception e)
+        {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Alert profile retrieval failed");
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.write(objectMapper.writeValueAsString(errorResponse));
+        }
+    }
+    private String extractProfileNameFromPath(HttpServletRequest request) {
+        String pathInfo = request.getPathInfo();
+        return (pathInfo != null && pathInfo.length() > 1) ? pathInfo.substring(1) : null;
     }
     @Override
     public void destroy()
