@@ -133,9 +133,4 @@ public class LoggingService {
             }
         }
     }
-    private static String formatTimestamp(long timestamp) {
-        // Convert the long timestamp to the format required by the Event Log query (ISO 8601)
-        Instant instant = Instant.ofEpochMilli(timestamp);
-        return instant.toString(); // Adjust this based on required format
-    }
 }
