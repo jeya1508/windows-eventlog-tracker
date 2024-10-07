@@ -19,10 +19,11 @@ thead {
 
 thead th {
   padding: 12px;
-  text-align: left;
+  text-align: center;
   font-weight: bold;
   font-size: 14px;
   text-transform: uppercase;
+  
 }
 
 tbody tr {
@@ -46,10 +47,10 @@ tbody td:first-child {
   color: #555;
 }
 
-tbody td:last-child {
+/* tbody td:last-child {
   font-weight: bold;
   color: #333;
-}
+} */
 
 @media (width <= 768px) {
   table,

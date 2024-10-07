@@ -7,6 +7,7 @@ export default class SearchRoute extends Route {
 
   setupController(controller) {
     super.setupController(...arguments);
+    controller.fetchResults();
   }
 
   beforeModel() {

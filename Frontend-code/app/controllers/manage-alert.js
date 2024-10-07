@@ -1,7 +1,7 @@
 import Controller from '@ember/controller';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
-import {inject as service} from '@ember/service';
+import { inject as service } from '@ember/service';
 
 export default class ManageAlertsController extends Controller {
   @tracked alertProfiles = [];
@@ -32,22 +32,29 @@ export default class ManageAlertsController extends Controller {
   @action
   editProfile(profile) {
     this.router.transitionTo('alertprofile', {
-      queryParams: { 
+      queryParams: {
         profileName: profile.profileName,
         criteria: profile.criteria,
-        notifyEmail: profile.notifyEmail ,
-        isEdit: true 
-      }
+        notifyEmail: profile.notifyEmail,
+        isEdit: true,
+      },
     });
-    
   }
 
   @action
   deleteProfile(profile) {
-    if (confirm(`Are you sure you want to delete the profile "${profile.profileName}"?`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete the profile "${profile.profileName}"?`,
+      )
+    ) {
       const xhr = new XMLHttpRequest();
-      xhr.open('DELETE', `http://localhost:8500/servletlog/v1/alert/profile/${profile.profileName}`, true);
-      xhr.withCredentials=true;
+      xhr.open(
+        'DELETE',
+        `http://localhost:8500/servletlog/v1/alert/profile/${profile.profileName}`,
+        true,
+      );
+      xhr.withCredentials = true;
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           this.fetchAlertProfiles();
@@ -62,8 +69,7 @@ export default class ManageAlertsController extends Controller {
     }
   }
   @action
-  redirectToAlert(){
+  redirectToAlert() {
     this.router.transitionTo('alerts');
   }
 }
-

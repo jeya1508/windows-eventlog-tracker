@@ -16,7 +16,7 @@ export default class AlertsController extends Controller {
   @tracked alertProfiles = [];
   @tracked isPopupVisible = false;
   @tracked exportHistoryData = [];
-  
+
   constructor() {
     super(...arguments);
   }
@@ -30,32 +30,30 @@ export default class AlertsController extends Controller {
     }
 
     const searchTerm = `${this.alertCategory}${condition}${this.profileName}`;
-    return encodeURIComponent(searchTerm).replace(/!/g, '%21');
+    return searchTerm; 
   }
 
-  fetchLogs(encodedSearchTerm) {
+  fetchLogs(searchTerm) {
+    const encodedSearchTerm = searchTerm ? encodeURIComponent(searchTerm) : null;
+
     let endpoint = encodedSearchTerm
       ? `search?query=${encodedSearchTerm}&page=${this.currentPage - 1}&pageSize=${this.pageSize}`
       : `all?page=${this.currentPage - 1}&pageSize=${this.pageSize}`;
-
+  
     if (this.searchAfter.length > 0 && this.currentPage > 1) {
       const searchAfterString = this.searchAfter.join(',');
       endpoint += `&searchAfter=${encodeURIComponent(searchAfterString)}`;
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open(
-      'GET',
-      `http://localhost:8500/servletlog/v1/alert/${endpoint}`,
-      true,
-    );
+    xhr.open('GET', `http://localhost:8500/servletlog/v1/alert/${endpoint}`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
 
     xhr.onload = () => {
-      const data = JSON.parse(xhr.responseText);
       if (xhr.status === 200) {
         try {
+          const data = JSON.parse(xhr.responseText);
           this.logs = data.logs;
           this.totalRecords = data.totalRecords;
           this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
@@ -77,11 +75,7 @@ export default class AlertsController extends Controller {
 
   fetchAlertProfiles() {
     const xhr = new XMLHttpRequest();
-    xhr.open(
-      'GET',
-      'http://localhost:8500/servletlog/v1/alert/allProfiles',
-      true,
-    );
+    xhr.open('GET', 'http://localhost:8500/servletlog/v1/alert/allProfiles', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
 
@@ -111,12 +105,11 @@ export default class AlertsController extends Controller {
   }
 
   @action
-  async submitSearch() {
+  submitSearch() {
     this.currentPage = 1;
     this.searchAfter = [];
-    this.fetchLogs(
-      this.searchTerm ? encodeURIComponent(this.searchTerm) : null,
-    );
+    const searchTerm = this.constructSearchTerm();
+    this.fetchLogs(searchTerm);
   }
 
   @action
@@ -124,18 +117,17 @@ export default class AlertsController extends Controller {
     this.pageSize = event.target.value;
     this.currentPage = 1;
     this.searchAfter = [];
-    this.fetchLogs(
-      this.searchTerm ? encodeURIComponent(this.searchTerm) : null,
-    );
+
+    const searchTerm = this.constructSearchTerm();
+    this.fetchLogs(searchTerm);
   }
 
   @action
   goToNextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.fetchLogs(
-        this.searchTerm ? encodeURIComponent(this.searchTerm) : null,
-      );
+      const searchTerm = this.constructSearchTerm();
+      this.fetchLogs(searchTerm);
     }
   }
 
@@ -143,17 +135,16 @@ export default class AlertsController extends Controller {
   goToPrevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.fetchLogs(
-        this.searchTerm ? encodeURIComponent(this.searchTerm) : null,
-      );
+      const searchTerm = this.constructSearchTerm();
+      this.fetchLogs(searchTerm);
     }
   }
 
   @action
   applyFiltering() {
-    this.searchTerm = this.constructSearchTerm();
+    const searchTerm = this.constructSearchTerm();
     this.currentPage = 1;
-    this.fetchLogs(this.searchTerm);
+    this.fetchLogs(searchTerm);
   }
 
   @action
@@ -180,23 +171,17 @@ export default class AlertsController extends Controller {
 
   @action
   exportAsCSV() {
-    console.log('Exporting as CSV...');
+    const searchTerm = this.constructSearchTerm();
+    const encodedSearchTerm = encodeURIComponent(searchTerm);
 
     const xhr = new XMLHttpRequest();
-    const searchTerm = this.constructSearchTerm();
-
-    xhr.open(
-      'GET',
-      `http://localhost:8500/servletlog/v1/alert/export/csv?query=${searchTerm}`,
-      true,
-    );
+    xhr.open('GET', `http://localhost:8500/servletlog/v1/alert/export/csv?query=${encodedSearchTerm}`, true);
     xhr.withCredentials = true;
     xhr.responseType = 'blob';
 
     xhr.onload = () => {
       if (xhr.status === 200) {
         const blob = xhr.response;
-
         const link = document.createElement('a');
         const url = window.URL.createObjectURL(blob);
         link.href = url;
@@ -210,6 +195,7 @@ export default class AlertsController extends Controller {
         console.error('Failed to export CSV:', xhr.statusText);
       }
     };
+
     xhr.onerror = () => {
       console.error('Network error occurred while exporting CSV.');
     };
@@ -248,12 +234,14 @@ export default class AlertsController extends Controller {
   closePopup() {
     this.isPopupVisible = false;
   }
+
   @action
   clearCSVFile(filename) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'http://localhost:8500/servletlog/v1/export/delete', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
+
     xhr.onload = () => {
       if (xhr.status === 200) {
         console.log('File deleted successfully');
@@ -263,36 +251,32 @@ export default class AlertsController extends Controller {
         );
       }
     };
+
     xhr.onerror = () => {
       console.error('Error in deleting file', xhr.statusText);
     };
-    const payload = {
-      fileName: filename,
-    };
 
+    const payload = { fileName: filename };
     xhr.send(JSON.stringify(payload));
   }
+
   @action
   clearAllFiles() {
     const xhr = new XMLHttpRequest();
-    xhr.open(
-      'POST',
-      'http://localhost:8500/servletlog/v1/export/delete/all',
-      true,
-    );
+    xhr.open('POST', 'http://localhost:8500/servletlog/v1/export/delete/all', true);
     xhr.withCredentials = true;
+
     xhr.onload = () => {
       if (xhr.status === 200) {
         console.log('All export history files deleted');
         this.set('exportHistoryData', []);
       }
     };
+
     xhr.onerror = () => {
-      console.error(
-        'Error while clearing all the files from export history',
-        xhr.statusText,
-      );
+      console.error('Error while clearing all the files from export history', xhr.statusText);
     };
+
     xhr.send();
   }
 }

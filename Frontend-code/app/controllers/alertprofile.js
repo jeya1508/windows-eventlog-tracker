@@ -23,9 +23,9 @@ export default class AlertprofileController extends Controller {
     let { profileName, criteria, notifyEmail } = this.model;
 
     const xhr = new XMLHttpRequest();
-    const method = this.model.isEdit ? 'PUT' : 'POST'; 
-    const url = this.model.isEdit 
-      ? `http://localhost:8500/servletlog/v1/alert/profile/${this.model.profileName}` 
+    const method = this.model.isEdit ? 'PUT' : 'POST';
+    const url = this.model.isEdit
+      ? `http://localhost:8500/servletlog/v1/alert/profile/${this.model.profileName}`
       : 'http://localhost:8500/servletlog/v1/alert/profile';
 
     xhr.open(method, url, true);

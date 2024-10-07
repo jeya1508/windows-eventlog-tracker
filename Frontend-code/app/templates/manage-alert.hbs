@@ -16,8 +16,8 @@
           <td>{{profile.criteria}}</td>
           <td>{{profile.notifyEmail}}</td>
           <td>
-            <button class="edit-button" {{on "click" (fn this.editProfile profile)}}><i class="fa-solid fa-pen-to-square"></i></button>
-            <button class="delete-button" {{on "click" (fn this.deleteProfile profile)}}><i class="fa-solid fa-trash"></i></button>
+            <button class="edit-button" type="button" {{on "click" (fn this.editProfile profile)}}><i class="fa-solid fa-pen-to-square"></i></button>
+            <button class="delete-button" type="button" {{on "click" (fn this.deleteProfile profile)}}><i class="fa-solid fa-trash"></i></button>
           </td>
         </tr>
       {{else}}
@@ -28,7 +28,7 @@
     </tbody>
   </table>
   <div class="back-button-container">
-    <button class="back-button" {{on "click" this.redirectToAlert}}>
+    <button class="back-button" type="button" {{on "click" this.redirectToAlert}}>
       Back 
     </button>
   </div>

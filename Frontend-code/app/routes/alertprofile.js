@@ -19,17 +19,16 @@ export default class AlertprofileRoute extends Route {
     notifyEmail: {
       refreshModel: true,
     },
-    isEdit: { 
+    isEdit: {
       refreshModel: false,
     },
   };
   model(params) {
-    
     return {
       profileName: params.profileName || '',
       criteria: params.criteria || '',
       notifyEmail: params.notifyEmail || '',
-      isEdit: params.isEdit || false, 
+      isEdit: params.isEdit || false,
 
       errorMessage: '',
     };

@@ -23,17 +23,16 @@ export default class HeaderComponent extends Component {
   @action
   goToAlertProfile() {
     this.router.transitionTo('alertprofile', {
-      queryParams: { 
+      queryParams: {
         profileName: '',
         criteria: '',
         notifyEmail: '',
-        isEdit: false // Reset isEdit as well
-      }
+        isEdit: false,
+      },
     });
-    
   }
   @action
-  manageAlertProfiles(){
+  manageAlertProfiles() {
     this.router.transitionTo('manageAlert');
   }
 }

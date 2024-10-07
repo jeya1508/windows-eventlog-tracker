@@ -1,11 +1,29 @@
+
 <div class="search-container">
   <h2>Event logs</h2>
-  <div class="search-bar">
-    <input type="text" placeholder="Search..." {{on "input" this.updateSearchTerm}} class="search-input">
-    <button class="search-btn" type="button" {{on "click" this.submitSearch}}>Search</button>
-    
-    <select class="search-category-dropdown" {{on "change" this.updateSearchCategory}}>
-      <option value="">Select Category</option>
+  <div class="search-filter">
+    <select class="filter-category" {{on "change" this.updateSearchCategory}}>
+      <option value="" selected>Search Category</option>
+      <option value="event_id">Event ID</option>
+      <option value="username">Username</option>
+      <option value="hostname">Hostname</option>
+      <option value="event_category">Event Category</option>
+      <option value="source">Source</option>
+      <option value="event_type">Event Type</option>
+    </select>
+    <select class="filter-condition" {{on "change" this.updateCondition}}>
+      <option value="" selected>Select Condition</option>
+      <option value="equals">Equals</option>
+      <option value="notequal">Not Equals</option>
+    </select>
+    <input type="text" placeholder="Enter value" class="filter-value" {{on "input" this.updateSearchField}}>
+
+    <button class="filter-btn" type="button" {{on "click" this.applyFiltering}}>Filter</button>
+  </div>
+
+  <div class="sorting-section">
+    <select class="search-category-dropdown" {{on "change" this.updateSortCategory}}>
+      <option value="">Sort Category</option>
       <option value="event_id">Event ID</option>
       <option value="username">Username</option>
       <option value="hostname">Hostname</option>
@@ -21,24 +39,21 @@
     <button class="sort-btn" type="button" {{on "click" this.applySorting}}>Sort</button>
   </div>
 
-  <div class="results-container">
-    {{#if this.results.length}}
-      <ul class="results-list">
-        {{#each this.results as |result|}}
-          <li class="result-item">{{result}}</li>
-        {{/each}}
-      </ul>
-    {{else}}
-      <p class="no-results">No results available.</p>
-    {{/if}}
-  </div>
+  {{#if this.results.length}}
+  <LogTable @logs={{this.results}} />
+  {{/if}}
+
 
   <div class="pagination-controls">
-    <button disabled={{eq this.currentPage 1}} type="button" {{on "click" this.goToPrevPage}}><i class="fa-solid fa-angle-left"></i></button>
+    <button disabled={{eq this.currentPage 1}} type="button" {{on "click" this.goToPrevPage}}>
+      <i class="fa-solid fa-angle-left"></i>
+    </button>
 
     <span>{{this.paginationInfo}}</span>
 
-    <button disabled={{eq this.currentPage this.totalPages}} type="button" {{on "click" this.goToNextPage}}><i class="fa-solid fa-angle-right"></i></button>
+    <button disabled={{eq this.currentPage this.totalPages}} type="button" {{on "click" this.goToNextPage}}>
+      <i class="fa-solid fa-angle-right"></i>
+    </button>
 
     <select {{on "change" this.changePageSize}}>
       <option value="5">5</option>
