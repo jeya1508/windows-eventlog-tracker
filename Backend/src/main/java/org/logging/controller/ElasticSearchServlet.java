@@ -63,7 +63,7 @@ public class ElasticSearchServlet extends HttpServlet {
         String sortOrder = req.getParameter("sortOrder");
 
         List<LogInfo> logs = elasticSearchService.getAllLogs(pageSize, searchAfter,sortBy,sortOrder);
-        long totalRecords = elasticSearchRepository.getTotalRecords("windows-event-logs");
+        long totalRecords = elasticSearchRepository.getTotalRecords("windows-logs");
 
         Map<String, Object> result = new HashMap<>();
         result.put("logs", logs);

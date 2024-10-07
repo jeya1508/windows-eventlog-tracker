@@ -8,7 +8,6 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import org.logging.entity.AlertInfo;
 import org.logging.entity.AlertProfile;
-import org.logging.exception.ValidationException;
 import org.logging.repository.AlertProfileRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ public class AlertRetrievalService {
     public List<AlertInfo> getAllAlerts(int pageSize, String[] searchAfter) throws IOException {
 
         SearchRequest searchRequest = SearchRequest.of(builder -> {
-            builder.index("alerts")
+            builder.index("alerts-index")
                     .size(pageSize)
                     .sort(sort -> sort.field(f -> f.field("time_generated").order(SortOrder.Desc)));
 
@@ -73,7 +72,7 @@ public class AlertRetrievalService {
     public List<AlertInfo> searchAlerts(String kqlQuery, int pageSize, String[] searchAfter) throws Exception {
             Query query = elasticSearchUtil.parseKqlToQuery(kqlQuery);
             SearchRequest searchRequest = SearchRequest.of(builder -> {
-                builder.index("alerts")
+                builder.index("alerts-index")
                         .query(query)
                         .size(pageSize)
                         .sort(sort -> sort.field(f -> f.field("time_generated").order(SortOrder.Desc)));

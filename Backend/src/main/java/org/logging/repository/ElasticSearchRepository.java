@@ -18,7 +18,7 @@ public class ElasticSearchRepository {
     public static String getLastIndexedRecordNumber() {
         try {
             SearchResponse<Map> searchResponse = client.search(s -> s
-                            .index("windows-event-logs")
+                            .index("windows-logs")
                             .sort(sort -> sort.field(f -> f.field("record_number.keyword").order(SortOrder.Desc)))  // Sort by record_number in descending order
                             .size(1),
                     Map.class

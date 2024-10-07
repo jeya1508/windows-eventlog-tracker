@@ -8,7 +8,6 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,7 +35,7 @@ public class ElasticSearchService {
         SortOrder sortingOrder = ("desc".equalsIgnoreCase(sortOrder) || sortOrder == null) ? SortOrder.Desc : SortOrder.Asc;
 
         SearchRequest searchRequest = SearchRequest.of(builder -> {
-            builder.index("windows-event-logs")
+            builder.index("windows-logs")
                     .size(pageSize)
                     .sort(sort -> sort.field(f -> f.field(sortField).order(sortingOrder)))
                     .sort(sort -> sort.field(f -> f.field("_seq_no").order(sortingOrder)));
@@ -78,7 +77,7 @@ public class ElasticSearchService {
     public List<LogInfo> searchLogs(String kqlQuery, int pageSize, String[] searchAfter) throws Exception {
             Query query = elasticSearchUtil.parseKqlToQuery(kqlQuery);
             SearchRequest searchRequest = SearchRequest.of(builder -> {
-                builder.index("windows-event-logs")
+                builder.index("windows-logs")
                         .query(query)
                         .size(pageSize)
                         .sort(sort -> sort.field(f -> f.field("time_generated").order(SortOrder.Desc)));

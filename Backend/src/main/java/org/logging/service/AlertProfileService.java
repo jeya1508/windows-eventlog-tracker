@@ -5,7 +5,6 @@ import org.logging.exception.ValidationException;
 import org.logging.repository.AlertProfileRepository;
 import org.logging.to.AlertProfileTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AlertProfileService {

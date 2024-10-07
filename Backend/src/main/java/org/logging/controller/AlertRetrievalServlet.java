@@ -1,7 +1,6 @@
 package org.logging.controller;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.logging.config.ElasticSearchConfig;
 import org.logging.entity.AlertInfo;

@@ -11,11 +11,11 @@ public class ElasticSearchUtil {
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchUtil.class);
     public Query parseKqlToQuery(String kqlQuery) {
         String[] conditions = kqlQuery.split("\\s+");
-        logger.info(conditions[0]);  // Logging first condition for debug purposes
+        logger.info(conditions[0]);
         BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
 
         for (String condition : conditions) {
-            if (condition.contains("!=")) {  // Handling 'must_not' condition
+            if (condition.contains("!=")) {
                 String[] parts = condition.split("!=");
                 String field = parts[0].trim();
                 String value = parts[1].trim();
@@ -42,12 +42,12 @@ public class ElasticSearchUtil {
                         logger.error("Unsupported field type for must_not condition: " + fieldType);
                         return null;
                 }
-            } else if (condition.contains("=")) {  // Optional: Add if you need 'must' conditions
+            } else if (condition.contains("=")) {
                 String[] parts = condition.split("=");
                 String field = parts[0].trim();
                 String value = parts[1].trim();
                 String fieldType = getFieldType(field);
-
+                logger.info("Field type is {}",fieldType);
                 switch (fieldType) {
                     case "keyword":
                         boolQueryBuilder.must(m -> m.term(t -> t
@@ -99,7 +99,7 @@ public class ElasticSearchUtil {
                 return "time_generated";
         }
     }
-    public boolean logMatchesCriteria(Map<String, Object> logData, String criteria) {
+    public boolean logMatchesCriteria(Map<String, String> logData, String criteria) {
         String[] keyValue = criteria.split("=");
         if (keyValue.length == 2) {
             String key = keyValue[0].trim();
