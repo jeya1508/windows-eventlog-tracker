@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\hp\Documents\log-export\LogDLL\x64\Debug\LogDLL.dll</FullPath>
+      <FullPath>C:\Users\hp\Documents\GitHub\windows-eventlog-tracker\LogDLL\x64\Debug\LogDLL.dll</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

@@ -1,2 +1,11 @@
-﻿     Creating library C:\Users\hp\Documents\log-export\LogDLL\x64\Debug\LogDLL.lib and object C:\Users\hp\Documents\log-export\LogDLL\x64\Debug\LogDLL.exp
-  LogDLL.vcxproj -> C:\Users\hp\Documents\log-export\LogDLL\x64\Debug\LogDLL.dll
+﻿  CollectWindowsLogs.cpp
+C:\Users\hp\Documents\GitHub\windows-eventlog-tracker\LogDLL\LogDLL\CollectWindowsLogs.cpp(33,22): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  (compiling source file '/CollectWindowsLogs.cpp')
+  
+C:\Users\hp\Documents\GitHub\windows-eventlog-tracker\LogDLL\LogDLL\CollectWindowsLogs.cpp(136,56): warning C4267: 'argument': conversion from 'size_t' to 'jsize', possible loss of data
+  (compiling source file '/CollectWindowsLogs.cpp')
+  
+C:\Users\hp\Documents\GitHub\windows-eventlog-tracker\LogDLL\LogDLL\CollectWindowsLogs.cpp(163,44): warning C4267: 'argument': conversion from 'size_t' to 'jsize', possible loss of data
+  (compiling source file '/CollectWindowsLogs.cpp')
+  
+  LogDLL.vcxproj -> C:\Users\hp\Documents\GitHub\windows-eventlog-tracker\LogDLL\x64\Debug\LogDLL.dll

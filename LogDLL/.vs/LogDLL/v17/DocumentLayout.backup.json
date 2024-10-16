@@ -1,22 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\",
+  "WorkspaceRootPath": "C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\CollectWindowsLogs.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\CollectWindowsLogs.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|solutionrelative:LogDLL\\CollectWindowsLogs.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\pch.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|solutionrelative:LogDLL\\pch.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\MainLogReader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|solutionrelative:LogDLL\\MainLogReader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\dllmain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\dllmain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|solutionrelative:LogDLL\\dllmain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\pch.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{CA48AECD-D68B-438B-9F23-57E1D5827072}|LogDLL\\LogDLL.vcxproj|solutionrelative:LogDLL\\pch.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -32,11 +28,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "CollectWindowsLogs.cpp",
-              "DocumentMoniker": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\CollectWindowsLogs.cpp",
+              "DocumentMoniker": "C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\CollectWindowsLogs.cpp",
               "RelativeDocumentMoniker": "LogDLL\\CollectWindowsLogs.cpp",
-              "ToolTip": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\CollectWindowsLogs.cpp",
+              "ToolTip": "C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\CollectWindowsLogs.cpp",
               "RelativeToolTip": "LogDLL\\CollectWindowsLogs.cpp",
-              "ViewState": "AgIAACoAAAAAAAAAAAAAAEYAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAGQAAAAAAAAAAAAuwJYAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-10-03T12:34:28.678Z",
               "EditorCaption": ""
@@ -44,35 +40,22 @@
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "MainLogReader.cpp",
-              "DocumentMoniker": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\MainLogReader.cpp",
-              "RelativeDocumentMoniker": "LogDLL\\MainLogReader.cpp",
-              "ToolTip": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\MainLogReader.cpp",
-              "RelativeToolTip": "LogDLL\\MainLogReader.cpp",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAcwBQAAAAVAAAAAAAAAA==",
+              "Title": "pch.cpp",
+              "DocumentMoniker": "C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\pch.cpp",
+              "RelativeDocumentMoniker": "LogDLL\\pch.cpp",
+              "ToolTip": "C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\pch.cpp",
+              "RelativeToolTip": "LogDLL\\pch.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-10-03T10:52:24.248Z"
+              "WhenOpened": "2024-10-03T10:39:47.171Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "pch.cpp",
-              "DocumentMoniker": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\pch.cpp",
-              "RelativeDocumentMoniker": "LogDLL\\pch.cpp",
-              "ToolTip": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\pch.cpp",
-              "RelativeToolTip": "LogDLL\\pch.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2024-10-03T10:39:47.171Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
               "Title": "dllmain.cpp",
-              "DocumentMoniker": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\dllmain.cpp",
+              "DocumentMoniker": "C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\dllmain.cpp",
               "RelativeDocumentMoniker": "LogDLL\\dllmain.cpp",
-              "ToolTip": "C:\\Users\\hp\\Documents\\log-export\\LogDLL\\LogDLL\\dllmain.cpp",
+              "ToolTip": "C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\LogDLL\\dllmain.cpp",
               "RelativeToolTip": "LogDLL\\dllmain.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",

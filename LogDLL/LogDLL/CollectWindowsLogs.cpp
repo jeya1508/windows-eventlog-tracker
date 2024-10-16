@@ -52,36 +52,63 @@ map<string, string> CreateLogDataMap(const EVENTLOGRECORD* record) {
     return logData;
 }
 
-extern "C" JNIEXPORT jobjectArray JNICALL Java_org_logging_config_EventLogCollector_collectWindowsLogs(JNIEnv* env, jobject obj) {
+extern "C" JNIEXPORT jobjectArray JNICALL Java_org_logging_config_EventLogCollector_collectWindowsLogs(JNIEnv* env, jobject obj, jlong lastRecordNumber) {
     HANDLE hEventLog = OpenEventLog(NULL, L"Security");
     if (hEventLog == NULL) {
         cerr << "Could not open event log: " << GetLastError() << endl;
         return nullptr;
     }
 
-    DWORD bytesRead = 0;
-    DWORD minBytesNeeded = sizeof(EVENTLOGRECORD);
-    vector<map<string, string>> logs;
-
-    unique_ptr<EVENTLOGRECORD> pRecord(static_cast<EVENTLOGRECORD*>(malloc(minBytesNeeded)));
-    if (!pRecord) {
-        cerr << "Memory allocation failed." << endl;
+    DWORD oldestRecord = 0;
+    DWORD numberOfRecords = 0;
+    if (!GetOldestEventLogRecord(hEventLog, &oldestRecord)) {
+        cerr << "Failed to get the oldest record: " << GetLastError() << endl;
         CloseEventLog(hEventLog);
         return nullptr;
     }
 
+    if (!GetNumberOfEventLogRecords(hEventLog, &numberOfRecords)) {
+        cerr << "Failed to get the number of records: " << GetLastError() << endl;
+        CloseEventLog(hEventLog);
+        return nullptr;
+    }
+
+    DWORD maxRecordNumber = oldestRecord + numberOfRecords - 1;
+    DWORD recordNumber = (lastRecordNumber == -1) ? oldestRecord : static_cast<DWORD>(lastRecordNumber);
+
+    cout << "Oldest record: " << oldestRecord << ", Max record: " << maxRecordNumber << ", Starting record: " << recordNumber << endl;
+
+    if (recordNumber == maxRecordNumber)
+    {
+        cout << "No more new logs" << endl;
+        CloseEventLog(hEventLog);
+        return nullptr;
+    }
+
+    if (recordNumber > maxRecordNumber) {
+        cerr << "Requested recordNumber " << recordNumber << " exceeds available records." << endl;
+        CloseEventLog(hEventLog);
+        return nullptr;
+    }
+
+    DWORD bytesRead = 0;
+    DWORD minBytesNeeded = sizeof(EVENTLOGRECORD);
+    vector<map<string, string>> logs;
+    unique_ptr<EVENTLOGRECORD, decltype(&free)> pRecord(static_cast<EVENTLOGRECORD*>(malloc(minBytesNeeded)), &free);
+
     while (true) {
-        if (!ReadEventLog(hEventLog, EVENTLOG_FORWARDS_READ | EVENTLOG_SEQUENTIAL_READ, 0, pRecord.get(), minBytesNeeded, &bytesRead, &minBytesNeeded)) {
+        if (!ReadEventLog(hEventLog, EVENTLOG_SEEK_READ | EVENTLOG_FORWARDS_READ, recordNumber, pRecord.get(), minBytesNeeded, &bytesRead, &minBytesNeeded)) {
             DWORD error = GetLastError();
             if (error == ERROR_INSUFFICIENT_BUFFER) {
                 pRecord.reset(static_cast<EVENTLOGRECORD*>(malloc(minBytesNeeded)));
                 if (!pRecord) {
-                    cerr << "Memory allocation failed." << endl;
+                    cerr << "Memory allocation failed during buffer resize." << endl;
                     break;
                 }
+                continue;  
             }
             else if (error == ERROR_NO_MORE_ITEMS || error == ERROR_HANDLE_EOF) {
-                cout << "Reached the end of the event log." << endl;
+                cout << "Reached the end of the event log. No more records to read." << endl;
                 break;
             }
             else {
@@ -89,23 +116,30 @@ extern "C" JNIEXPORT jobjectArray JNICALL Java_org_logging_config_EventLogCollec
                 break;
             }
         }
-        else {
-            logs.push_back(CreateLogDataMap(pRecord.get()));
+        logs.push_back(CreateLogDataMap(pRecord.get()));
 
+        recordNumber = pRecord->RecordNumber + 1;
+
+        if (recordNumber > maxRecordNumber) {
+            cout << "Reached the last record. Stopping at record number: " << recordNumber - 1 << endl;
+            break;  
         }
     }
+
     jclass mapClass = env->FindClass("java/util/HashMap");
     if (mapClass == nullptr) {
         cerr << "Error: Unable to find HashMap class" << endl;
         CloseEventLog(hEventLog);
         return nullptr;
     }
+
     jobjectArray result = env->NewObjectArray(logs.size(), mapClass, nullptr);
     if (result == nullptr) {
         cerr << "Error: Unable to create new jobjectArray" << endl;
         CloseEventLog(hEventLog);
         return nullptr;
     }
+
     jmethodID putMethod = env->GetMethodID(mapClass, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
     jmethodID initMethod = env->GetMethodID(mapClass, "<init>", "()V");
 
