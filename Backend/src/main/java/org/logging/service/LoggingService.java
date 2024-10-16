@@ -38,20 +38,15 @@ public class LoggingService {
 
             List<AlertProfile> alertProfiles = alertProfileRepository.findAll();
             String lastIndexedRecordNumber = getLastIndexedRecordNumber();
-
-            Map<String, String>[] logs = eventLogCollector.collectWindowsLogs();
+            long lastRecordNumber = (lastIndexedRecordNumber!=null)?Long.parseLong(lastIndexedRecordNumber):-1;
+            Map<String, String>[] logs = eventLogCollector.collectWindowsLogs(lastRecordNumber);
             if(logs == null)
             {
-                logger.error("Could not retrieve the logs ");
                 return;
             }
             for (Map<String, String> logData : logs) {
                 logData.put("hostname",hostName);
                 logData.put("username",username);
-                String currentRecordNumber = logData.get("record_number");
-                if (lastIndexedRecordNumber != null && Long.parseLong(currentRecordNumber) <= Long.parseLong(lastIndexedRecordNumber)) {
-                    continue;
-                }
 
                 buffer.add(logData);
 

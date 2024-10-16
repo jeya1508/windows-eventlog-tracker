@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     org_logging_config_EventLogCollector
  * Method:    collectWindowsLogs
- * Signature: ()[Ljava/util/Map;
+ * Signature: (J)[Ljava/util/Map;
  */
 JNIEXPORT jobjectArray JNICALL Java_org_logging_config_EventLogCollector_collectWindowsLogs
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus
 }
