@@ -6,6 +6,7 @@ import co.elastic.clients.elasticsearch.core.BulkResponse;
 import org.logging.config.ElasticSearchConfig;
 import org.logging.config.EventLogCollector;
 import org.logging.entity.AlertProfile;
+import org.logging.repository.ElasticSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ import java.net.InetAddress;
 import java.util.*;
 
 import org.logging.repository.AlertProfileRepository;
-import static org.logging.repository.ElasticSearchRepository.getLastIndexedRecordNumber;
+import org.logging.repository.RecordNumberStorage;
 
 public class LoggingService {
 
@@ -37,13 +38,25 @@ public class LoggingService {
             String username = System.getProperty("user.name");
 
             List<AlertProfile> alertProfiles = alertProfileRepository.findAll();
-            String lastIndexedRecordNumber = getLastIndexedRecordNumber();
+
+            String lastIndexedRecordNumber = RecordNumberStorage.getLastRecordNumber();
+            if(lastIndexedRecordNumber == null)
+            {
+                logger.info("It seems there is no record number in file. Checking in ES");
+                lastIndexedRecordNumber = ElasticSearchRepository.getLastIndexedRecordNumber();
+            }
             long lastRecordNumber = (lastIndexedRecordNumber!=null)?Long.parseLong(lastIndexedRecordNumber):-1;
+
             Map<String, String>[] logs = eventLogCollector.collectWindowsLogs(lastRecordNumber);
+
             if(logs == null)
             {
                 return;
             }
+
+            String recordNumber = logs[logs.length-1].get("record_number");
+            RecordNumberStorage.saveLastRecordNumber(recordNumber);
+
             for (Map<String, String> logData : logs) {
                 logData.put("hostname",hostName);
                 logData.put("username",username);
@@ -86,6 +99,7 @@ public class LoggingService {
             if (!alertBuffer.isEmpty()) {
                 indexLogsToElasticSearch(alertBuffer, "alerts-index");
             }
+
 
         } catch (Exception e) {
             logger.error("Error in collecting logs {}", e.getMessage());
