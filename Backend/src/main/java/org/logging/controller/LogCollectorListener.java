@@ -11,7 +11,7 @@ import javax.servlet.annotation.WebListener;
 public class LogCollectorListener implements ServletContextListener {
     private static final Logger logger = LoggerFactory.getLogger(LogCollectorListener.class);
     private Thread logThread;
-    private LogCollectorTask logCollectorTask;
+    LogCollectorTask logCollectorTask;
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {

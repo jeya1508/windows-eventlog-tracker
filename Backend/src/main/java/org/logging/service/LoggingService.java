@@ -4,105 +4,91 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import org.logging.config.ElasticSearchConfig;
-import org.logging.config.EventLogCollector;
 import org.logging.entity.AlertProfile;
+import org.logging.producerconsumer.CircularBlockingQueue;
+import org.logging.producerconsumer.LogConsumer;
+import org.logging.producerconsumer.LogProducer;
+import org.logging.repository.CloseableRecordTracker;
 import org.logging.repository.ElasticSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.logging.repository.AlertProfileRepository;
-import org.logging.repository.RecordNumberStorage;
 
-public class LoggingService {
+public class LoggingService implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingService.class);
-    private static final int LOGS_BATCH_SIZE = 2000;
-    private static final int ALERT_BATCH_SIZE = 1000;
+    private static final int QUEUE_CAPACITY = 50;
+    private static final int NUM_PRODUCERS = 1;
+    private static final int NUM_CONSUMERS = 2;
 
-    private static final EventLogCollector eventLogCollector = new EventLogCollector();
-    private static final ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
     private static final AlertProfileRepository alertProfileRepository = new AlertProfileRepository();
+    private static List<LogProducer> logProducers = new ArrayList<>();
+
+    static CloseableRecordTracker recordTracker;
+
+    static {
+        try {
+            recordTracker = CloseableRecordTracker.getInstance();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void collectWindowsLogs() {
-        Set<String> triggeredProfiles = new HashSet<>();
 
-        List<Map<String, String>> buffer = new ArrayList<>();
-        List<Map<String, String>> alertBuffer = new ArrayList<>();
+        CircularBlockingQueue<Map<String, String>> queue = new CircularBlockingQueue<>(QUEUE_CAPACITY);
 
-        try {
-            String hostName = InetAddress.getLocalHost().getHostName();
-            String username = System.getProperty("user.name");
+        long lastRecordNumber = recordTracker.getCurrentRecordNumber();
+        if(lastRecordNumber==-1)
+        {
+            logger.info("It seems there is no record number in the file. Checking in ES");
+            String recNo = ElasticSearchRepository.getLastIndexedRecordNumber();
+            lastRecordNumber = (recNo == null)? -1 : Long.parseLong(recNo);
 
-            List<AlertProfile> alertProfiles = alertProfileRepository.findAll();
+        }
+        recordTracker.updateRecordNumber(lastRecordNumber);
+        List<AlertProfile> alertProfiles = alertProfileRepository.findAll();
 
-            String lastIndexedRecordNumber = RecordNumberStorage.getLastRecordNumber();
-            if(lastIndexedRecordNumber == null)
-            {
-                logger.info("It seems there is no record number in file. Checking in ES");
-                lastIndexedRecordNumber = ElasticSearchRepository.getLastIndexedRecordNumber();
-            }
-            long lastRecordNumber = (lastIndexedRecordNumber!=null)?Long.parseLong(lastIndexedRecordNumber):-1;
+        AtomicBoolean isDone = new AtomicBoolean(false);
 
-            Map<String, String>[] logs = eventLogCollector.collectWindowsLogs(lastRecordNumber);
+        ExecutorService executorService = Executors.newFixedThreadPool(NUM_PRODUCERS + NUM_CONSUMERS);
 
-            if(logs == null)
-            {
-                return;
-            }
+        for (int i = 0; i < NUM_PRODUCERS; i++) {
+            LogProducer logProducer = new LogProducer(queue,lastRecordNumber,isDone);
+            logProducers.add(logProducer);
+            executorService.submit(logProducer);
 
-            String recordNumber = logs[logs.length-1].get("record_number");
-            RecordNumberStorage.saveLastRecordNumber(recordNumber);
+            logger.info("Producer thread started");
+        }
 
-            for (Map<String, String> logData : logs) {
-                logData.put("hostname",hostName);
-                logData.put("username",username);
+        for (int i = 0; i < NUM_CONSUMERS; i++) {
+            LogConsumer logConsumer = new LogConsumer(queue,alertProfiles,isDone);
+            executorService.submit(logConsumer);
+        }
+        executorService.shutdown();
+        synchronized (LoggingService.class) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("Shutdown Hook triggered. Closing LoggingService");
 
-                buffer.add(logData);
-
-                for (AlertProfile profile : alertProfiles) {
-                    if (elasticSearchUtil.logMatchesCriteria(logData, profile.getCriteria())) {
-                        Map<String, String> alertLog = new HashMap<>(logData);
-                        alertLog.put("profile_name", profile.getProfileName());
-                        alertBuffer.add(alertLog);
-
-                        if (!triggeredProfiles.contains(profile.getProfileName())) {
-                            String recipientEmail = profile.getNotifyEmail();
-                            if (recipientEmail != null && !recipientEmail.isEmpty()) {
-                                String emailSubject = "Alert Triggered: " + profile.getProfileName();
-                                String emailBody = "Alert was triggered for the profile " + profile.getProfileName() + "\n To view all alerts, visit http://localhost:4200/";
-                                EmailService.sendEmail(recipientEmail, emailSubject, emailBody);
-
-                                triggeredProfiles.add(profile.getProfileName());
-                            }
-                        }
+                try {
+                    recordTracker.close();
+                    if(!executorService.isShutdown()) {
+                        executorService.shutdown();
                     }
+
+                } catch (IOException e) {
+                    logger.error("Error while shutdown {}", e.getMessage());
                 }
 
-                if (buffer.size() >= LOGS_BATCH_SIZE) {
-                    indexLogsToElasticSearch(buffer, "windows-logs");
-                    buffer.clear();
-                }
-                if (alertBuffer.size() >= ALERT_BATCH_SIZE) {
-                    indexLogsToElasticSearch(alertBuffer, "alerts-index");
-                    alertBuffer.clear();
-                }
-            }
-
-            if (!buffer.isEmpty()) {
-                indexLogsToElasticSearch(buffer, "windows-logs");
-            }
-
-            if (!alertBuffer.isEmpty()) {
-                indexLogsToElasticSearch(alertBuffer, "alerts-index");
-            }
-
-
-        } catch (Exception e) {
-            logger.error("Error in collecting logs {}", e.getMessage());
+            }));
         }
     }
 
@@ -126,7 +112,7 @@ public class LoggingService {
 
             logger.info("Indexed {} ",response.items().size() +" documents in "+indexName);
         } catch (IOException e) {
-            logger.error("Error in ES {}",e.getMessage());
+            logger.error("Error in ES {}",e.getMessage()+"in "+indexName);
         } finally {
             try {
                 ElasticSearchConfig.closeClient();
@@ -134,5 +120,10 @@ public class LoggingService {
                 logger.error("Exception while closing ES Client {}",e.getMessage());
             }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        recordTracker.close();
     }
 }
