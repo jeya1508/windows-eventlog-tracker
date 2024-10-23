@@ -16,6 +16,11 @@ export default class SearchController extends Controller {
   @tracked sortCategory = '';
   @tracked sortOrder = '';
   @tracked condition = '';
+  @tracked selectedDevice = 'Local System';
+  @tracked isDeviceModalOpen = false;
+  @tracked devices = [];
+
+  @tracked tempSelectedDevice = this.selectedDevice;
 
   @service session;
   @service router;
@@ -161,6 +166,11 @@ export default class SearchController extends Controller {
   }
 
   @action
+  updateSelectedDevice(event)
+  {
+    this.selectedDevice = event.target.value;
+  }
+  @action
   applySorting() {
     this.currentPage = 1;
     this.searchAfter = [];
@@ -173,5 +183,51 @@ export default class SearchController extends Controller {
     const start = (this.currentPage - 1) * this.pageSize + 1;
     const end = Math.min(this.currentPage * this.pageSize, this.totalRecords);
     return `${start} - ${end} of ${this.totalRecords}`;
+  }
+  @action
+  openDeviceSelection() {
+    this.tempSelectedDevice = this.selectedDevice;
+    this.isDeviceModalOpen = true;
+  }
+
+  @action
+  closeDeviceSelection() {
+    this.isDeviceModalOpen = false;
+  }
+  @action
+  updateSelectedDeviceTemp(event) {
+    this.tempSelectedDevice = event.target.value;
+  }
+
+  @action
+  submitSelectedDevice() {
+    this.selectedDevice = this.tempSelectedDevice;
+    this.isDeviceModalOpen = false;
+  }
+  @action
+  fetchDevicesList() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://localhost:8500/servletlog/v1/device/all', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.withCredentials = true;
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          this.devices = data || [];
+        } catch (error) {
+          console.error('Error parsing alert profiles:', error);
+        }
+      } else {
+        console.error('Error fetching alert profiles');
+      }
+    };
+
+    xhr.onerror = () => {
+      console.error('Network error while fetching alert profiles');
+    };
+
+    xhr.send();
   }
 }

@@ -38,6 +38,32 @@
     
     <button class="sort-btn" type="button" {{on "click" this.applySorting}}>Sort</button>
   </div>
+  <div class="select-device-logs">
+  <span>Logs taken from {{this.selectedDevice}}</span>
+
+  <button class="choose-device-btn" type="button" {{on "click" this.openDeviceSelection}}>
+    <i class="fa-solid fa-microchip"></i> Choose device
+  </button>
+</div>
+
+{{#if this.isDeviceModalOpen}}
+   <div class="device-selection-popup">
+    <div class="popup-content">
+      <h3>Select a Device</h3>
+      
+      <div class="device-list">
+        {{#each this.devices as |device|}}
+          <label>
+            <input type="radio" name="device" value={{device}} {{on "change" this.updateSelectedDeviceTemp}} checked={{eq this.tempSelectedDevice device}}> {{device}}
+          </label>
+        {{/each}}
+      </div>
+      <button class="submit-device-btn" {{on "click" this.submitSelectedDevice}}>Submit</button>
+      <button class="cancel-btn" {{on "click" this.closeDeviceSelection}}>Cancel</button>
+    </div>
+  </div>
+{{/if}}
+
 
   {{#if this.results.length}}
   <LogTable @logs={{this.results}} />
