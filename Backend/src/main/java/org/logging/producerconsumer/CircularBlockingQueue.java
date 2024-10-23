@@ -97,6 +97,7 @@ public class CircularBlockingQueue<T> implements Serializable {
             producerRear = 0;
             producerSize = 0;
             logger.info("Serialized producer queue to file.");
+            notEmpty.signalAll();
         } catch (IOException e) {
             logger.info("Error during serialization: {}", e.getMessage());
         } finally {
