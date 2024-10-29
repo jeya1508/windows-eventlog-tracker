@@ -17,5 +17,10 @@
       <div class="error-message">{{this.errorMessage}}</div>
     {{/if}}
 <button type="submit" class="btn-submit">{{if this.model.profileName "Update profile" "Add profile"}}</button>
-  </form> 
+  </form>
+  <div class="back-button-container">
+    <button class="back-button" type="button" {{on "click" this.redirectToAlert}}>
+      Back 
+    </button>
+  </div> 
 </div>

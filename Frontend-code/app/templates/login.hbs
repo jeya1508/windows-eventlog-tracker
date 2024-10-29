@@ -13,4 +13,13 @@
 
     <button type="submit" class="submit-btn">Login</button>
   </form>
+  <div class="google-signin-container">
+    <button class="google-signin-btn" type="button" {{on "click" this.signInWithGoogle}}>
+      <img src="assets/google_logo.png" alt="Google Logo" class="google-logo" />
+      Sign in with Google
+    </button>
+</div>
+<div class = "new-user-info">
+  <p>New to Event Tracker? <a href="/register">Sign up now</a></p>
+</div>
 </div>

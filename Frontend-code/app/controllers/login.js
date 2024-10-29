@@ -36,8 +36,8 @@ export default class LoginController extends Controller {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
     xhr.onload = () => {
-      if (xhr.status === 200) {
-        try {
+      try {
+        if (xhr.status === 200) {
           let jsonResponse = JSON.parse(xhr.responseText);
           this.session.setSessionId(jsonResponse.sessionId);
           this.session.login();
@@ -45,11 +45,12 @@ export default class LoginController extends Controller {
           this.password = '';
 
           this.router.transitionTo('dashboard');
-        } catch (error) {
-          console.error('Error parsing response:', error);
-          alert('Login failed! Please try again.');
+        } else {
+          let resp = JSON.parse(xhr.responseText);
+          alert(resp.error);
         }
-      } else {
+      } catch (error) {
+        console.error('Error parsing response:', error);
         alert('Login failed! Please try again.');
       }
     };
@@ -57,5 +58,9 @@ export default class LoginController extends Controller {
       console.error('Login request failed', xhr.statusText);
     };
     xhr.send(JSON.stringify(loginData));
+  }
+  @action
+  signInWithGoogle() {
+    window.location.href = 'http://localhost:8500/servletlog/v1/user/login';
   }
 }

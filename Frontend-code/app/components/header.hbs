@@ -16,6 +16,9 @@
           </div>
         </div>
       {{/if}}
+      {{#if this.isOnSearchRoute}}
+        <button class = "add-device-button" type="button" {{on "click" this.goToAddDevice}}><i class="fa-solid fa-plus"></i>  Add device</button>
+      {{/if}}
       <button class="logout-button" type="button" {{on "click" this.logout}}>Logout</button>
   </div>
   {{/if}}

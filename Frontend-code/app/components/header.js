@@ -14,6 +14,10 @@ export default class HeaderComponent extends Component {
     return this.router.currentRouteName === 'alerts';
   }
 
+  get isOnSearchRoute() {
+    return this.router.currentRouteName === 'search';
+  }
+
   @action
   logout() {
     this.session.logout();
@@ -34,5 +38,9 @@ export default class HeaderComponent extends Component {
   @action
   manageAlertProfiles() {
     this.router.transitionTo('manageAlert');
+  }
+  @action
+  goToAddDevice() {
+    this.router.transitionTo('managedevice');
   }
 }

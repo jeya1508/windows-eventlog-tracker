@@ -16,6 +16,7 @@ export default class AlertsController extends Controller {
   @tracked alertProfiles = [];
   @tracked isPopupVisible = false;
   @tracked exportHistoryData = [];
+  @tracked isLoading = false;
 
   constructor() {
     super(...arguments);
@@ -30,27 +31,34 @@ export default class AlertsController extends Controller {
     }
 
     const searchTerm = `${this.alertCategory}${condition}${this.profileName}`;
-    return searchTerm; 
+    return searchTerm;
   }
 
   fetchLogs(searchTerm) {
-    const encodedSearchTerm = searchTerm ? encodeURIComponent(searchTerm) : null;
+    const encodedSearchTerm = searchTerm
+      ? encodeURIComponent(searchTerm)
+      : null;
 
     let endpoint = encodedSearchTerm
       ? `search?query=${encodedSearchTerm}&page=${this.currentPage - 1}&pageSize=${this.pageSize}`
       : `all?page=${this.currentPage - 1}&pageSize=${this.pageSize}`;
-  
+
     if (this.searchAfter.length > 0 && this.currentPage > 1) {
       const searchAfterString = this.searchAfter.join(',');
       endpoint += `&searchAfter=${encodeURIComponent(searchAfterString)}`;
     }
-
+    this.isLoading = true;
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', `http://localhost:8500/servletlog/v1/alert/${endpoint}`, true);
+    xhr.open(
+      'GET',
+      `http://localhost:8500/servletlog/v1/alert/${endpoint}`,
+      true,
+    );
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
 
     xhr.onload = () => {
+      this.isLoading = false;
       if (xhr.status === 200) {
         try {
           const data = JSON.parse(xhr.responseText);
@@ -67,6 +75,7 @@ export default class AlertsController extends Controller {
     };
 
     xhr.onerror = () => {
+      this.isLoading = false;
       console.error('Network error while fetching logs');
     };
 
@@ -75,7 +84,11 @@ export default class AlertsController extends Controller {
 
   fetchAlertProfiles() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://localhost:8500/servletlog/v1/alert/allProfiles', true);
+    xhr.open(
+      'GET',
+      'http://localhost:8500/servletlog/v1/alert/allProfiles',
+      true,
+    );
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
 
@@ -175,7 +188,11 @@ export default class AlertsController extends Controller {
     const encodedSearchTerm = encodeURIComponent(searchTerm);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', `http://localhost:8500/servletlog/v1/alert/export/csv?query=${encodedSearchTerm}`, true);
+    xhr.open(
+      'GET',
+      `http://localhost:8500/servletlog/v1/alert/export/csv?query=${encodedSearchTerm}`,
+      true,
+    );
     xhr.withCredentials = true;
     xhr.responseType = 'blob';
 
@@ -263,7 +280,11 @@ export default class AlertsController extends Controller {
   @action
   clearAllFiles() {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8500/servletlog/v1/export/delete/all', true);
+    xhr.open(
+      'POST',
+      'http://localhost:8500/servletlog/v1/export/delete/all',
+      true,
+    );
     xhr.withCredentials = true;
 
     xhr.onload = () => {
@@ -274,7 +295,10 @@ export default class AlertsController extends Controller {
     };
 
     xhr.onerror = () => {
-      console.error('Error while clearing all the files from export history', xhr.statusText);
+      console.error(
+        'Error while clearing all the files from export history',
+        xhr.statusText,
+      );
     };
 
     xhr.send();

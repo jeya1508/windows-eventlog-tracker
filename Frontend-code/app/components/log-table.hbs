@@ -2,18 +2,97 @@
   <thead>
     <tr>
       <th>Time Generated</th>
-      <th>Log Information</th>
+      <th class ="sortable-header">
+        Event Category
+        <div class="sort-buttons">
+          <button class="sort-button up" {{on "click" (fn this.sortColumn "event_category" "asc")}}>
+            <i class="fa-solid fa-angle-up"></i>
+          </button>
+          <button class="sort-button down" {{on "click" (fn this.sortColumn "event_category" "desc")}}>
+            <i class="fa-solid fa-angle-down"></i>
+          </button>
+        </div>
+      </th>
+      <th class="sortable-header">
+        Event ID
+        <div class="sort-buttons">
+          <button class="sort-button up" {{on "click" (fn this.sortColumn "event_id" "asc")}}>
+            <i class="fa-solid fa-angle-up"></i>
+          </button>
+          <button class="sort-button down" {{on "click" (fn this.sortColumn "event_id" "desc")}}>
+            <i class="fa-solid fa-angle-down"></i>
+          </button>
+        </div>
+      </th>
+      <th class="sortable-header">
+        Source
+        <div class="sort-buttons">
+          <button class="sort-button up" {{on "click" (fn this.sortColumn "source" "asc")}}>
+            <i class="fa-solid fa-angle-up"></i>
+          </button>
+          <button class="sort-button down" {{on "click" (fn this.sortColumn "source" "desc")}}>
+            <i class="fa-solid fa-angle-down"></i>
+          </button>
+        </div>
+      </th>
+      <th class="sortable-header">
+        Event type
+        <div class="sort-buttons">
+          <button class="sort-button up" {{on "click" (fn this.sortColumn "event_type" "asc")}}>
+            <i class="fa-solid fa-angle-up"></i>
+          </button>
+          <button class="sort-button down" {{on "click" (fn this.sortColumn "event_type" "desc")}}>
+            <i class="fa-solid fa-angle-down"></i>
+          </button>
+        </div>
+      </th>
+      {{!-- <th class="sortable-header">
+        Hostname
+       <div class="sort-buttons">
+          <button class="sort-button up" {{on "click" (fn this.sortColumn "hostname" "asc")}}>
+            <i class="fa-solid fa-angle-up"></i>
+          </button>
+          <button class="sort-button down" {{on "click" (fn this.sortColumn "hostname" "desc")}}>
+            <i class="fa-solid fa-angle-down"></i>
+          </button>
+        </div>
+      </th>
+      <th class="sortable-header">
+        Username
+        <div class="sort-buttons">
+          <button class="sort-button up" {{on "click" (fn this.sortColumn "username" "asc")}}>
+            <i class="fa-solid fa-angle-up"></i>
+          </button>
+          <button class="sort-button down" {{on "click" (fn this.sortColumn "username" "desc")}}>
+            <i class="fa-solid fa-angle-down"></i>
+          </button>
+        </div>
+      </th> --}}
+      <th class="sortable-header">
+        Record Number
+        <div class="sort-buttons">
+          <button class="sort-button up" {{on "click" (fn this.sortColumn "record_number" "asc")}}>
+            <i class="fa-solid fa-angle-up"></i>
+          </button>
+          <button class="sort-button down" {{on "click" (fn this.sortColumn "record_number" "desc")}}>
+            <i class="fa-solid fa-angle-down"></i>
+          </button>
+        </div>
+      </th>
     </tr>
   </thead>
   <tbody>
     {{#each @logs as |log|}}
       <tr>
         <td>{{this.formatTimestamp log.time_generated}}</td>
-        <td>
-          Event category: {{log.event_category}}, Event_id: {{log.event_id}}, Source: {{log.source}}, Event_type: {{log.event_type}}, Hostname: {{log.hostname}}, Username: {{log.username}}, Record Number: {{log.record_number}}, Time written: {{this.formatTimestamp log.time_written}}
-        </td>
+        <td>{{log.event_category}}</td>
+        <td>{{log.event_id}}</td>
+        <td>{{log.source}}</td> 
+        <td>{{log.event_type}}</td> 
+        {{!-- <td>{{log.hostname}}</td> 
+        <td>{{log.username}}</td> --}}
+        <td>{{log.record_number}}</td>
       </tr>
     {{/each}}
   </tbody>
 </table>
-

@@ -14,4 +14,5 @@ Router.map(function () {
   this.route('alerts');
   this.route('alertprofile');
   this.route('manageAlert');
+  this.route('managedevice');
 });

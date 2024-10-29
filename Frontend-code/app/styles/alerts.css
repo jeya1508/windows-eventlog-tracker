@@ -23,7 +23,12 @@ thead th {
   font-weight: bold;
   font-size: 14px;
   text-transform: uppercase;
-  
+}
+thead th button{
+  border: none;
+  cursor: pointer;
+  background-color: none;
+  outline: none;
 }
 
 tbody tr {

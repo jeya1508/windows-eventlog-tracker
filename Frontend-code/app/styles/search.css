@@ -13,7 +13,6 @@ h2 {
   margin-bottom: 20px;
 }
 
-
 .search-filter {
   display: flex;
   justify-content: center;
@@ -53,6 +52,7 @@ h2 {
 .filter-btn:hover {
   background-color: #39d3ee;
 }
+
 .results-container {
   max-height: 400px;
   overflow-y: auto;
@@ -120,6 +120,7 @@ h2 {
   border-radius: 4px;
   background-color: white;
 }
+
 .sorting-section {
   display: flex;
   justify-content: center;
@@ -129,7 +130,8 @@ h2 {
 }
 
 .search-category-dropdown,
-.sort-order-dropdown {
+.sort-order-dropdown,
+.device-select-dropdown {
   padding: 8px;
   font-size: 14px;
   border: 1px solid #ddd;
@@ -150,6 +152,7 @@ h2 {
 .sort-btn:hover {
   background-color: #39d3ee;
 }
+
 .select-device-logs {
   display: flex;
   justify-content: center;
@@ -158,32 +161,12 @@ h2 {
   margin: 20px 0;
 }
 
-.choose-device-btn {
-  position: relative;
-  padding: 10px 10px;
-  font-size: 14px;
-  background-color: #06c069;
-  color: white;
+.select-device-logs button {
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
-.choose-device-btn:hover {
-  background-color: #049665;
-  box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
-}
-
-.choose-device-btn:focus {
-  outline: none;
-  background-color: #06c069;
-  box-shadow: 0 0 5px rgb(0 255 145 / 50%);
-}
-
-.choose-device-btn i {
+.select-device-logs button i {
   margin-left: 8px;
   font-size: 18px;
 }
@@ -194,12 +177,22 @@ h2 {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgb(0 0 0 / 50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000; 
 }
 
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999; 
+}
 .popup-content {
   background-color: white;
   padding: 20px;
@@ -208,18 +201,19 @@ h2 {
   width: 500px;
   text-align: center;
 }
+
 .device-list {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   align-items: flex-start;
-  margin-bottom: 20px; 
+  margin-bottom: 20px;
 }
 
 .device-list label {
   display: flex;
-  align-items: center; 
-  margin-bottom: 10px; 
-  white-space: nowrap; 
+  align-items: center;
+  margin-bottom: 10px;
+  white-space: nowrap;
 }
 
 .device-list input[type="radio"] {
@@ -229,7 +223,7 @@ h2 {
 .submit-device-btn,
 .cancel-btn {
   padding: 10px 20px;
-  margin: 5px; 
+  margin: 5px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -243,19 +237,58 @@ h2 {
 }
 
 .submit-device-btn:hover {
-  background-color: #0056b3; 
+  background-color: #0056b3;
 }
+
 .cancel-btn {
   background-color: #dc3545;
   color: white;
 }
 
 .cancel-btn:hover {
-  background-color: #c82333; 
+  background-color: #c82333;
 }
 
 .submit-device-btn:focus,
 .cancel-btn:focus {
   outline: none;
-  box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+  box-shadow: 0 0 5px rgb(0 123 255 / 50%);
+}
+.sortable-header {
+  position: relative;
+  padding-right: 30px; 
+  text-align: left; 
+}
+
+.sort-buttons {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sort-button {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sort-button i {
+  font-size: 0.8rem; 
+  color: #333;
+}
+
+.sort-button:hover i {
+  color: #555;
+}
+.spinner i{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
 }

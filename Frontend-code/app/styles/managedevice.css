@@ -1,8 +1,8 @@
-.register-container {
+.add-device-container {
   max-width: 400px;
-  margin: 100px auto;
+  margin: 70px auto;
   padding: 20px;
-  background-color: #dfd4d4e5;
+  background-color: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgb(12 12 12 / 30%);
 }
@@ -13,18 +13,18 @@ h2 {
   font-size: 24px;
 }
 
-.register-form .form-group {
+.add-device-form .form-group {
   margin-bottom: 15px;
 }
 
-.register-form label {
+.add-device-form label {
   display: block;
   margin-bottom: 5px;
   font-size: 14px;
   font-weight: bold;
 }
 
-.register-form input {
+.add-device-form input {
   width: 95%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -32,7 +32,15 @@ h2 {
   font-size: 14px;
 }
 
-.register-form .btn-submit {
+.add-device-form select {
+  width: 95%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.add-device-form .btn-submit {
   width: 100%;
   padding: 10px;
   background-color: #28a745;
@@ -43,7 +51,7 @@ h2 {
   cursor: pointer;
 }
 
-.register-form .btn-submit:hover {
+.add-device-form .btn-submit:hover {
   background-color: #218838;
 }
 
@@ -51,14 +59,4 @@ h2 {
   margin-top: 10px;
   color: red;
   font-size: 14px;
-}
-
-.existing-user-info {
-  align-items: center;
-  text-align: center;
-}
-
-.existing-user-info a {
-  text-decoration: none;
-  font-weight: bold;
 }

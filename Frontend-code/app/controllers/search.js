@@ -16,18 +16,19 @@ export default class SearchController extends Controller {
   @tracked sortCategory = '';
   @tracked sortOrder = '';
   @tracked condition = '';
-  @tracked selectedDevice = 'Local System';
+  @tracked selectedDevice = '';
   @tracked isDeviceModalOpen = false;
   @tracked devices = [];
 
   @tracked tempSelectedDevice = this.selectedDevice;
-
+  @tracked isLoading = false;
   @service session;
   @service router;
-
+  
   constructor() {
     super(...arguments);
   }
+  
   constructSearchTerm() {
     let condition = '';
     if (this.condition === 'equals') {
@@ -37,50 +38,45 @@ export default class SearchController extends Controller {
     }
 
     const searchTerm = `${this.searchCategory}${condition}${this.searchField}`;
-    
+
     return searchTerm;
   }
   fetchResults(encodedSearchTerm) {
     let endpoint = encodedSearchTerm
       ? `search?query=${encodedSearchTerm}&page=${this.currentPage - 1}&pageSize=${this.pageSize}`
       : `search/all?page=${this.currentPage - 1}&pageSize=${this.pageSize}`;
-
+  
     if (this.searchAfter && this.searchAfter.length > 0) {
       const searchAfterString = this.searchAfter.join(',');
       endpoint += `&searchAfter=${encodeURIComponent(searchAfterString)}`;
     }
-
+    if(this.selectedDevice)
+    {
+      endpoint +=`&deviceName=${this.selectedDevice}`;
+    }
     if (this.sortCategory) {
       endpoint += `&sortBy=${this.sortCategory}`;
     }
-
+  
     if (this.sortOrder) {
       endpoint += `&sortOrder=${this.sortOrder}`;
     }
-
+  
+    this.isLoading = true; 
+  
     const xhr = new XMLHttpRequest();
-    xhr.open(
-      'GET',
-      `http://localhost:8500/servletlog/v1/logs/${endpoint}`,
-      true,
-    );
+    xhr.open('GET', `http://localhost:8500/servletlog/v1/logs/${endpoint}`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
+  
     xhr.onload = () => {
+      this.isLoading = false; 
       if (xhr.status === 200) {
         try {
           let data = JSON.parse(xhr.responseText);
           this.results = data.logs;
-          // this.results =
-          //   data.logs.map((item) =>
-          //     Object.entries(item)
-          //       .filter(([key, value]) => key !== 'sortValues' && key !== '_id')
-          //       .map(([key, value]) => `${key}: ${value}`)
-          //       .join(', '),
-          //   ) || [];
           this.totalRecords = data.totalRecords;
           this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
-
           this.searchAfter = data.searchAfter || [];
         } catch (error) {
           console.error('Error:', error);
@@ -90,12 +86,23 @@ export default class SearchController extends Controller {
         console.error('Error fetching results');
       }
     };
+  
     xhr.onerror = () => {
+      this.isLoading = false;
       console.error('Request failed', xhr.statusText);
     };
+  
     xhr.send();
   }
-
+  
+  @action
+  sortLogs(column, order) {
+    this.sortCategory = column;
+    this.sortOrder = order;
+    this.currentPage = 1;
+    this.searchAfter = [];
+    this.fetchResults(this.constructSearchTerm());
+  }
   @action
   updateSearchTerm(event) {
     this.searchTerm = event.target.value;
@@ -114,6 +121,7 @@ export default class SearchController extends Controller {
     this.currentPage = 1;
     this.searchAfter = [];
     this.fetchResults(this.searchTerm);
+    this.isDeviceModalOpen = false;
   }
   @action
   async submitSearch() {
@@ -130,7 +138,7 @@ export default class SearchController extends Controller {
     this.currentPage = 1;
     this.searchAfter = [];
     const searchTerm = this.constructSearchTerm();
-    this.fetchResults(searchTerm );
+    this.fetchResults(searchTerm);
   }
 
   @action
@@ -138,7 +146,7 @@ export default class SearchController extends Controller {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
       const searchTerm = this.constructSearchTerm();
-      this.fetchResults(searchTerm );
+      this.fetchResults(searchTerm);
     }
   }
 
@@ -147,7 +155,7 @@ export default class SearchController extends Controller {
     if (this.currentPage > 1) {
       this.currentPage--;
       const searchTerm = this.constructSearchTerm();
-      this.fetchResults(searchTerm );
+      this.fetchResults(searchTerm);
     }
   }
 
@@ -166,9 +174,10 @@ export default class SearchController extends Controller {
   }
 
   @action
-  updateSelectedDevice(event)
-  {
+  updateSelectedDevice(event) {
     this.selectedDevice = event.target.value;
+    const searchTerm = this.constructSearchTerm();
+    this.fetchResults(searchTerm);
   }
   @action
   applySorting() {
@@ -186,7 +195,7 @@ export default class SearchController extends Controller {
   }
   @action
   openDeviceSelection() {
-    this.tempSelectedDevice = this.selectedDevice;
+    // this.tempSelectedDevice = this.selectedDevice;
     this.isDeviceModalOpen = true;
   }
 

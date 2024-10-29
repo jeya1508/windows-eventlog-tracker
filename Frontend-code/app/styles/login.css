@@ -2,7 +2,7 @@
   max-width: 400px;
   margin: 100px auto;
   padding: 40px;
-  background-color: #f9f9f9;
+  background-color: #dfd4d4e5;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgb(12 12 12 / 30%);
 }
@@ -60,4 +60,41 @@ input:focus {
 
 .submit-btn:focus {
   outline: none;
+}
+
+.google-signin-container {
+  display: flex;
+  justify-content: center; /* Centers horizontally */
+  align-items: center;
+  padding: 20px; /* Centers vertically */
+}
+
+.google-signin-btn {
+  display: flex;
+  align-items: center;
+  background-color: #7299d8;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.google-signin-btn:hover {
+  background-color: #9db4dd;
+}
+
+.google-logo {
+  width: 25px;
+  margin-right: 8px;
+}
+
+.new-user-info {
+  align-items: center;
+  text-align: center;
+}
+
+.new-user-info a {
+  text-decoration: none;
+  font-weight: bold;
 }
