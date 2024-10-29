@@ -172,7 +172,7 @@ public class AlertRetrievalServlet extends HttpServlet {
             result.put("pageSize", pageSize);
 
             if (!logs.isEmpty()) {
-                AlertInfo lastLog = logs.get(logs.size() - 1);
+                AlertInfo lastLog = logs.getLast();
                 result.put("searchAfter", lastLog.getSortValues());
             }
 

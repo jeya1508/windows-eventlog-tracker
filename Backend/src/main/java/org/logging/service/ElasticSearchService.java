@@ -1,5 +1,6 @@
 package org.logging.service;
 
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
@@ -11,6 +12,8 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import java.util.Arrays;
 import java.util.List;
 
+import co.elastic.clients.elasticsearch.indices.GetIndexRequest;
+import org.logging.entity.DeviceInfo;
 import org.logging.entity.LogInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,53 +32,82 @@ public class ElasticSearchService {
         this.elasticsearchClient = elasticsearchClient;
         this.validationService = validationService;
     }
-    public List<LogInfo> getAllLogs(int pageSize, String[] searchAfter, String sortBy, String sortOrder) throws Exception {
+    public List<LogInfo> getAllLogs(DeviceInfo deviceInfo, int pageSize, String[] searchAfter, String sortBy, String sortOrder) throws Exception {
 
         String sortField = (sortBy != null && !sortBy.isEmpty()) ? elasticSearchUtil.getSortField(sortBy) : "time_generated";
         SortOrder sortingOrder = ("desc".equalsIgnoreCase(sortOrder) || sortOrder == null) ? SortOrder.Desc : SortOrder.Asc;
 
-        SearchRequest searchRequest = SearchRequest.of(builder -> {
-            builder.index("windows-logs")
-                    .size(pageSize)
-                    .sort(sort -> sort.field(f -> f.field(sortField).order(sortingOrder)))
-                    .sort(sort -> sort.field(f -> f.field("_seq_no").order(sortingOrder)));
+        String deviceName = (deviceInfo!=null) ? deviceInfo.getDeviceName() : null;
+        String indexName = (deviceName == null )? "windows-logs" : "windows-logs-"+deviceName;
+        logger.info("Is index exists {}",isIndexExists(indexName));
+        if(isIndexExists(indexName))
+        {
+            SearchRequest searchRequest = SearchRequest.of(builder -> {
+                builder.index(indexName)
+                        .size(pageSize)
+                        .sort(sort -> sort.field(f -> f.field(sortField).order(sortingOrder)))
+                        .sort(sort -> sort.field(f -> f.field("_seq_no").order(sortingOrder)));
 
-            if (searchAfter != null && searchAfter.length > 0) {
-                List<FieldValue> searchAfterValues = Arrays.stream(searchAfter)
-                        .map(val -> validationService.isNumeric(val) ? FieldValue.of(Long.parseLong(val)) : FieldValue.of(val))
-                        .collect(Collectors.toList());
+                if (searchAfter != null && searchAfter.length > 0) {
+                    List<FieldValue> searchAfterValues = Arrays.stream(searchAfter)
+                            .map(val -> validationService.isNumeric(val) ? FieldValue.of(Long.parseLong(val)) : FieldValue.of(val))
+                            .collect(Collectors.toList());
 
-                builder.searchAfter(searchAfterValues);
+                    builder.searchAfter(searchAfterValues);
 
-            }
+                }
 
-            return builder;
-        });
+                return builder;
+            });
 
-        SearchResponse<LogInfo> searchResponse = elasticsearchClient.search(searchRequest, LogInfo.class);
+            SearchResponse<LogInfo> searchResponse = elasticsearchClient.search(searchRequest, LogInfo.class);
 
-        return searchResponse.hits().hits().stream()
-                .map(hit -> {
-                    LogInfo logInfo = hit.source();
-                    if (logInfo != null) {
-                        Object[] sortValues = Arrays.stream(hit.sort().toArray())
-                                .map(fieldValue -> {
-                                    if (fieldValue instanceof FieldValue) {
-                                        return ((FieldValue) fieldValue)._get();
-                                    }
-                                    return fieldValue;
-                                }).toArray();
-                        logInfo.setSortValues(sortValues);
-                    }
-                    return logInfo;
-                })
-                .collect(Collectors.toList());
+            return searchResponse.hits().hits().stream()
+                    .map(hit -> {
+                        LogInfo logInfo = hit.source();
+                        if (logInfo != null) {
+                            Object[] sortValues = Arrays.stream(hit.sort().toArray())
+                                    .map(fieldValue -> {
+                                        if (fieldValue instanceof FieldValue) {
+                                            return ((FieldValue) fieldValue)._get();
+                                        }
+                                        return fieldValue;
+                                    }).toArray();
+                            logInfo.setSortValues(sortValues);
+                        }
+                        return logInfo;
+                    })
+                    .collect(Collectors.toList());
+        }
+        else{
+            return null;
+        }
     }
 
+    public boolean isIndexExists(String indexName) {
+        boolean exists = false;
+        try {
+            GetIndexRequest request = new GetIndexRequest.Builder()
+                    .index(indexName)
+                    .build();
 
+            elasticsearchClient.indices().get(request);
+            exists = true;
+        } catch (ElasticsearchException e) {
+            if (e.response().status() != 404) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return exists;
+    }
 
-    public List<LogInfo> searchLogs(String kqlQuery, int pageSize, String[] searchAfter) throws Exception {
-            Query query = elasticSearchUtil.parseKqlToQuery(kqlQuery);
+    public List<LogInfo> searchLogs(DeviceInfo deviceInfo, String kqlQuery, int pageSize, String[] searchAfter) throws Exception {
+        Query query = elasticSearchUtil.parseKqlToQuery(kqlQuery);
+        String deviceName = (deviceInfo!=null) ? deviceInfo.getDeviceName() : null;
+        String indexName = (deviceName == null )? "windows-logs" : "windows-logs-"+deviceName;
+        if(isIndexExists(indexName)) {
             SearchRequest searchRequest = SearchRequest.of(builder -> {
                 builder.index("windows-logs")
                         .query(query)
@@ -111,6 +143,10 @@ public class ElasticSearchService {
                         return logInfo;
                     })
                     .collect(Collectors.toList());
+        }
+        else{
+            return null;
+        }
     }
     public long getSearchedCount() {
         return SEARCH_COUNT;

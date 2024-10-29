@@ -7,11 +7,11 @@ public class EventLogCollector {
         System.load("C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\x64\\Debug\\LogDLL.dll");
     }
 
-    public native Map<String, String>[] collectWindowsLogs(long lastRecordNumber);
+    public native Map<String, String>[] collectWindowsLogs(String ipAddress, String hostName, String password, long lastRecordNumber);
 
     public static void main(String[] args) {
         EventLogCollector collector = new EventLogCollector();
-        Map<String, String>[] logs = collector.collectWindowsLogs(5836683);
+        Map<String, String>[] logs = collector.collectWindowsLogs("192.168.1.39","hp","Ranaja@1744",5909810);
 
         if (logs == null) {
             return;

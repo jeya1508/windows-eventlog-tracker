@@ -22,7 +22,8 @@ public class AuthenticationFilter implements Filter {
 
         String path = httpRequest.getRequestURI();
 
-        if ("/servletlog/v1/user/login".equals(path) || "/servletlog/v1/user/register".equals(path) || "/servletlog/".equals(path)) {
+        if ("/servletlog/v1/user/login".equals(path) || "/servletlog/v1/user/register".equals(path) ||
+                "/servletlog/".equals(path) || "/servletlog/v1/user/google-callback".equals(path)) {
             chain.doFilter(request, response);
             return;
         }

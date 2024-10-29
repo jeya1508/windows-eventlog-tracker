@@ -25,7 +25,9 @@ public class LoginServlet extends HttpServlet {
     private ObjectMapper objectMapper = new ObjectMapper();
     private UserRepository userRepository;
     private static final Logger logger = LoggerFactory.getLogger(LoginServlet.class);
-
+    private static final String CLIENT_ID = System.getenv("OAUTH_CLIENT_ID");
+    private static final String REDIRECT_URI = "http://localhost:8500/servletlog/v1/user/google-callback";
+    private static final String AUTH_URI = "https://accounts.google.com/o/oauth2/auth";
     @Override
     public void init() throws ServletException {
         super.init();
@@ -71,6 +73,23 @@ public class LoginServlet extends HttpServlet {
 
         out.flush();
         out.close();
+    }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException
+    {
+        try {
+            String oauthUrl = AUTH_URI + "?client_id=" + CLIENT_ID
+                    + "&redirect_uri=" + REDIRECT_URI
+                    + "&response_type=code"
+                    + "&scope=profile email";
+
+            resp.sendRedirect(oauthUrl);
+        }
+        catch(IOException e)
+        {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            logger.error("Exception while redirecting to the URL {}",e.getMessage());
+        }
     }
     @Override
     public void destroy()

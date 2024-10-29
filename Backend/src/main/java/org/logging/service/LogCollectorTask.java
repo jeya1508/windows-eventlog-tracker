@@ -21,7 +21,7 @@ public class LogCollectorTask implements Runnable {
         scheduler.scheduleAtFixedRate(() -> {
             if (running) {
                 try {
-                    LoggingService.collectWindowsLogs();
+                    LoggingService.collectWindowsLogs(null,null,null);
                 } catch (Exception e) {
                     logger.error("Error collecting logs: {}", e.getMessage());
                 }

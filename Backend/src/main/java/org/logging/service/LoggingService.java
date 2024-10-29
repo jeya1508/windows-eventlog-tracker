@@ -25,7 +25,7 @@ import org.logging.repository.AlertProfileRepository;
 public class LoggingService implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingService.class);
-    private static final int QUEUE_CAPACITY = 50;
+    private static final int QUEUE_CAPACITY = 500;
     private static final int NUM_PRODUCERS = 1;
     private static final int NUM_CONSUMERS = 2;
 
@@ -42,7 +42,7 @@ public class LoggingService implements Closeable {
         }
     }
 
-    public static void collectWindowsLogs() {
+    public static void collectWindowsLogs(String ipAddress, String hostName, String password) {
 
         CircularBlockingQueue<Map<String, String>> queue = new CircularBlockingQueue<>(QUEUE_CAPACITY);
 
@@ -62,7 +62,7 @@ public class LoggingService implements Closeable {
         ExecutorService executorService = Executors.newFixedThreadPool(NUM_PRODUCERS + NUM_CONSUMERS);
 
         for (int i = 0; i < NUM_PRODUCERS; i++) {
-            LogProducer logProducer = new LogProducer(queue,lastRecordNumber,isDone);
+            LogProducer logProducer = new LogProducer(queue, ipAddress, hostName, password, lastRecordNumber,isDone);
             logProducers.add(logProducer);
             executorService.submit(logProducer);
 

@@ -21,8 +21,8 @@ public class LogConsumer implements Runnable {
     private final Set<String> triggeredProfiles = new HashSet<>();
     private final ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
 
-    private static final int LOGS_BATCH_SIZE = 100;
-    private static final int ALERT_BATCH_SIZE = 50;
+    private static final int LOGS_BATCH_SIZE = 2000;
+    private static final int ALERT_BATCH_SIZE = 1000;
 
     private final AtomicBoolean isDone;
 

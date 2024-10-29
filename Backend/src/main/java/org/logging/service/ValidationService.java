@@ -29,5 +29,12 @@ public class ValidationService {
         HttpSession session = req.getSession(false);
         return session != null && session.getAttribute("user") != null;
     }
+    public boolean isValidIPAddress(String ipAddress)
+    {
+        String zeroTo255 = "(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])";
+        String regex = zeroTo255 + "\\." + zeroTo255 + "\\."
+                + zeroTo255 + "\\." + zeroTo255;
+        return !ipAddress.isEmpty() && Pattern.compile(regex).matcher(ipAddress).matches();
+    }
 }
 

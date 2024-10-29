@@ -4,18 +4,25 @@ import org.logging.config.EventLogCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 public class LogProducer implements Runnable {
     private final CircularBlockingQueue<Map<String, String>> queue;
     private final EventLogCollector eventLogCollector;
     private final long lastRecordNumber;
+    private final String ipAddress;
+    private final String hostName;
+    private final String password;
     private final AtomicBoolean isDone;
 
     private static final Logger logger = LoggerFactory.getLogger(LogProducer.class);
 
-    public LogProducer(CircularBlockingQueue<Map<String, String>> queue, long lastRecordNumber, AtomicBoolean isDone) {
+    public LogProducer(CircularBlockingQueue<Map<String, String>> queue, String ipAddress, String hostName, String password, long lastRecordNumber, AtomicBoolean isDone) {
         this.queue = queue;
+        this.ipAddress = ipAddress;
+        this.hostName = hostName;
+        this.password = password;
         this.eventLogCollector = new EventLogCollector();
         this.lastRecordNumber = lastRecordNumber;
         this.isDone = isDone;
@@ -24,12 +31,15 @@ public class LogProducer implements Runnable {
     @Override
     public void run() {
         try {
-            Map<String, String>[] logs = eventLogCollector.collectWindowsLogs(lastRecordNumber);
+            Map<String, String>[] logs = eventLogCollector.collectWindowsLogs(ipAddress, hostName, password, lastRecordNumber);
             logger.info("Size of event logs is {} ", (logs != null ? logs.length : 0));
-
+            String hostName = InetAddress.getLocalHost().getHostName();
+            String username = System.getProperty("user.name");
             if (logs != null) {
                 for (Map<String, String> log : logs) {
                     try {
+                        log.put("hostname",hostName);
+                        log.put("username",username);
                         queue.produce(log);
                         Thread.sleep(500);
                     }

@@ -1,8 +1,10 @@
 package org.logging.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.logging.config.ElasticSearchConfig;
+import org.logging.entity.DeviceInfo;
 import org.logging.entity.LogInfo;
 import org.logging.repository.ElasticSearchRepository;
+import org.logging.service.DeviceService;
 import org.logging.service.ElasticSearchService;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import org.logging.service.ValidationService;
@@ -22,6 +24,7 @@ public class ElasticSearchServlet extends HttpServlet {
     private ElasticSearchService elasticSearchService;
     private ObjectMapper objectMapper;
     ValidationService validationService = new ValidationService();
+    private static DeviceService deviceService;
     private final ElasticSearchRepository elasticSearchRepository = new ElasticSearchRepository();
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchServlet.class);
 
@@ -30,6 +33,7 @@ public class ElasticSearchServlet extends HttpServlet {
         ElasticsearchClient elasticsearchClient = ElasticSearchConfig.createElasticsearchClient();
         this.elasticSearchService = new ElasticSearchService(elasticsearchClient,validationService);
         objectMapper = new ObjectMapper();
+        deviceService = new DeviceService();
     }
 
     @Override
@@ -54,23 +58,34 @@ public class ElasticSearchServlet extends HttpServlet {
         }
     }
 
-    private void handleGetAllLogs(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public void handleGetAllLogs(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        long totalRecords = 0;
         int pageSize = Integer.parseInt(req.getParameter("pageSize") != null ? req.getParameter("pageSize") : "10");
         String searchAfterParam = req.getParameter("searchAfter");
         String[] searchAfter = searchAfterParam!=null ? searchAfterParam.split(","): null;
 
+        String deviceName = req.getParameter("deviceName") !=null ?req.getParameter("deviceName"):null;
+        logger.info("Device name is {}", deviceName);
+        DeviceInfo deviceInfo = (deviceName == null) ? null: deviceService.getDeviceFromDeviceName(deviceName) ;
+        logger.info("Device info is {}",deviceInfo);
+
         String sortBy = req.getParameter("sortBy");
         String sortOrder = req.getParameter("sortOrder");
 
-        List<LogInfo> logs = elasticSearchService.getAllLogs(pageSize, searchAfter,sortBy,sortOrder);
-        long totalRecords = elasticSearchRepository.getTotalRecords("windows-logs");
+        List<LogInfo> logs = elasticSearchService.getAllLogs(deviceInfo, pageSize, searchAfter,sortBy,sortOrder);
+        logger.info("Logs are {}",logs);
 
+        String indexName = (deviceName == null) ? "windows-logs" : "windows-logs-"+deviceName;
+        if(elasticSearchService.isIndexExists(indexName)) {
+             totalRecords = elasticSearchRepository.getTotalRecords(indexName);
+        }
+        logger.info("Total records is {}",totalRecords);
         Map<String, Object> result = new HashMap<>();
         result.put("logs", logs);
         result.put("totalRecords", totalRecords);
         result.put("pageSize", pageSize);
 
-        if (!logs.isEmpty()) {
+        if (logs!=null && !logs.isEmpty()) {
             LogInfo lastLog = logs.getLast();
             result.put("searchAfter", lastLog.getSortValues());
         }
@@ -79,25 +94,35 @@ public class ElasticSearchServlet extends HttpServlet {
         PrintWriter out = resp.getWriter();
         out.print(objectMapper.writeValueAsString(result));
         out.flush();
+        out.close();
     }
 
 
 
     private void handleSearchLogs(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        long totalRecords = 0;
         String query = req.getParameter("query");
 
         int pageSize = Integer.parseInt(req.getParameter("pageSize") != null ? req.getParameter("pageSize") : "10");
         String[] searchAfter = req.getParameterValues("searchAfter");
-        List<LogInfo> logs = elasticSearchService.searchLogs(query, pageSize,searchAfter);
 
-        long totalRecords = elasticSearchService.getSearchedCount();
+        String deviceName = req.getParameter("deviceName") !=null ?req.getParameter("deviceName"):null;
+        DeviceInfo deviceInfo = (deviceName == null) ? null: deviceService.getDeviceFromDeviceName(deviceName) ;
+
+        String indexName = (deviceName == null) ? "windows-logs" : "windows-logs-"+deviceName;
+
+        List<LogInfo> logs = elasticSearchService.searchLogs(deviceInfo, query, pageSize,searchAfter);
+        if(elasticSearchService.isIndexExists(indexName)) {
+            totalRecords = elasticSearchService.getSearchedCount();
+        }
+
 
         Map<String, Object> result = new HashMap<>();
         result.put("logs", logs);
         result.put("totalRecords", totalRecords);
         result.put("pageSize", pageSize);
 
-        if (!logs.isEmpty()) {
+        if (logs!=null && !logs.isEmpty()) {
             LogInfo lastLog = logs.getLast();
             result.put("searchAfter", lastLog.getSortValues());
         }
