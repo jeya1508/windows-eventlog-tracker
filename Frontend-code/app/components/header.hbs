@@ -1,25 +1,80 @@
 <header>
-  <h1>
+  <div class="dropdown">
+    <button class="header-btn" type="button">{{#if this.isLoggedIn}}<i class="fa-solid fa-bars"></i>{{/if}}</button>
+    {{#if this.isLoggedIn}}
+     <div class="header-dropdown-content">
+        <a href="" {{on "click" this.goToDashboard}}><i class="fa-solid fa-house"></i>  Home</a>
+        <a href="" {{on "click" this.goToSearch}}><i class="fa-regular fa-file-lines"></i>  Logs</a>
+        <a href="" {{on "click" this.goToAlerts}}><i class="fa-regular fa-bell"></i>  Alerts</a>
+    </div>
+    {{/if}}
     <a href={{if this.isLoggedIn "/dashboard" "/"}} class="no-style-link">
       EventTracker
     </a>
-  </h1>
+  </div>
+    
 
   {{#if this.isLoggedIn}}
-    <div class="header-buttons">
+  <div class="header-buttons">
       {{#if this.isOnAlertsRoute}}
-        <div class="dropdown">
-          <button class="dropbtn" type="button">Alert Profiles</button>
-          <div class="dropdown-content">
-            <a href="" {{on "click" this.goToAlertProfile}}><i class="fa-solid fa-plus"></i> Add</a>
-            <a href="" {{on "click" this.manageAlertProfiles}}><i class="fa-solid fa-gear"></i> Manage</a>
+        <div class="left-buttons">
+          <div class="export-buttons">
+            <button class="export-as-btn" type="button">
+              <i class="fa-solid fa-file-export"></i> 
+              <span class="dropdown-arrow"></span>
+              <div class="export-dropdown-menu">
+                <option value="csv" {{on "click" this.exportAsCSV}}>CSV</option>
+              </div>
+            </button>
+            
+            <button class="export-history-btn" type="button" {{on "click" this.exportHistory}}>
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </button>
+
+            {{#if this.isPopupVisible}}
+              <div class="export-history-popup">
+                <div class="export-history-list">
+                  <div class="export-history-heading">
+                    <p>Export History</p>
+                    <button class="close-popup" type="button" {{on "click" this.closePopup}}>X</button>
+                  </div>
+                  
+                  {{#if (eq this.exportHistoryData.length 0)}}
+                    <p>No history available</p>  
+                  {{else}}
+                    <ul>
+                      {{#each this.exportHistoryData as |export|}}
+                        <li class="export-item">
+                          <a href={{export.preSignedUrl}} target="_blank" rel="noopener noreferrer">{{export.fileName}}</a>
+                          <button class="clear-file" type="button" {{on "click" (fn this.clearCSVFile export.fileName)}}>Clear</button>
+                        </li>
+                      {{/each}}
+                    </ul>
+                  {{/if}}
+              </div>
+              
+              {{#if this.exportHistoryData.length}}
+                <button class="clear-all-files-btn" type="button" {{on "click" this.clearAllFiles}}>Clear All</button>
+              {{/if}}
+              </div>
+            {{/if}}
+          </div>
+          <div class="dropdown">
+            <button class="dropbtn" type="button">Alert Profiles</button>
+            <div class="dropdown-content">
+              <a href="" {{on "click" this.goToAlertProfile}}><i class="fa-solid fa-plus"></i> Add</a>
+              <a href="" {{on "click" this.manageAlertProfiles}}><i class="fa-solid fa-gear"></i> Manage</a>
+            </div>
           </div>
         </div>
       {{/if}}
+  
       {{#if this.isOnSearchRoute}}
-        <button class = "add-device-button" type="button" {{on "click" this.goToAddDevice}}><i class="fa-solid fa-plus"></i>  Add device</button>
+        <button class="add-device-button" type="button" {{on "click" this.goToAddDevice}}><i class="fa-solid fa-plus"></i> Add device</button>
       {{/if}}
+  
       <button class="logout-button" type="button" {{on "click" this.logout}}>Logout</button>
-  </div>
+</div>
+
   {{/if}}
 </header>

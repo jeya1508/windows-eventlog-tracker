@@ -20,7 +20,7 @@ export default class AlertprofileRoute extends Route {
       refreshModel: true,
     },
     isEdit: {
-      refreshModel: false,
+      refreshModel: true,
     },
   };
   model(params) {

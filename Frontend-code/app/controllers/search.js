@@ -24,11 +24,11 @@ export default class SearchController extends Controller {
   @tracked isLoading = false;
   @service session;
   @service router;
-  
+
   constructor() {
     super(...arguments);
   }
-  
+
   constructSearchTerm() {
     let condition = '';
     if (this.condition === 'equals') {
@@ -45,32 +45,35 @@ export default class SearchController extends Controller {
     let endpoint = encodedSearchTerm
       ? `search?query=${encodedSearchTerm}&page=${this.currentPage - 1}&pageSize=${this.pageSize}`
       : `search/all?page=${this.currentPage - 1}&pageSize=${this.pageSize}`;
-  
+
     if (this.searchAfter && this.searchAfter.length > 0) {
       const searchAfterString = this.searchAfter.join(',');
       endpoint += `&searchAfter=${encodeURIComponent(searchAfterString)}`;
     }
-    if(this.selectedDevice)
-    {
-      endpoint +=`&deviceName=${this.selectedDevice}`;
+    if (this.selectedDevice) {
+      endpoint += `&deviceName=${this.selectedDevice}`;
     }
     if (this.sortCategory) {
       endpoint += `&sortBy=${this.sortCategory}`;
     }
-  
+
     if (this.sortOrder) {
       endpoint += `&sortOrder=${this.sortOrder}`;
     }
-  
-    this.isLoading = true; 
-  
+
+    this.isLoading = true;
+
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', `http://localhost:8500/servletlog/v1/logs/${endpoint}`, true);
+    xhr.open(
+      'GET',
+      `http://localhost:8500/servletlog/v1/logs/${endpoint}`,
+      true,
+    );
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.withCredentials = true;
-  
+
     xhr.onload = () => {
-      this.isLoading = false; 
+      this.isLoading = false;
       if (xhr.status === 200) {
         try {
           let data = JSON.parse(xhr.responseText);
@@ -86,15 +89,15 @@ export default class SearchController extends Controller {
         console.error('Error fetching results');
       }
     };
-  
+
     xhr.onerror = () => {
       this.isLoading = false;
       console.error('Request failed', xhr.statusText);
     };
-  
+
     xhr.send();
   }
-  
+
   @action
   sortLogs(column, order) {
     this.sortCategory = column;
@@ -176,8 +179,42 @@ export default class SearchController extends Controller {
   @action
   updateSelectedDevice(event) {
     this.selectedDevice = event.target.value;
-    const searchTerm = this.constructSearchTerm();
-    this.fetchResults(searchTerm);
+    this.getLogsFromDevice();
+  }
+  @action
+  getLogsFromDevice() {
+    this.isLoading = true;
+    const xhr = new XMLHttpRequest();
+    xhr.open(
+      'GET',
+      `http://localhost:8500/servletlog/v1/device/find?deviceName=${this.selectedDevice}`,
+    );
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.withCredentials = true;
+    xhr.onload = () => {
+      this.isLoading = false;
+      if (xhr.status === 200) {
+        try {
+          let data = JSON.parse(xhr.responseText);
+          this.results = data.logs;
+          this.totalRecords = data.totalRecords;
+          this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+          this.searchAfter = data.searchAfter || [];
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred while fetching results.');
+        }
+      } else {
+        console.error('Error fetching results');
+      }
+    };
+
+    xhr.onerror = () => {
+      this.isLoading = false;
+      console.error('Request failed', xhr.statusText);
+    };
+
+    xhr.send();
   }
   @action
   applySorting() {

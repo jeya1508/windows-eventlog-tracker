@@ -24,7 +24,7 @@ thead th {
   font-size: 14px;
   text-transform: uppercase;
 }
-thead th button{
+thead th button {
   border: none;
   cursor: pointer;
   background-color: none;
@@ -148,15 +148,15 @@ tbody td:first-child {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin: 20px 0;
+  /* gap: 10px;
+  margin: 20px 0; */
 }
 
 .export-as-btn {
   position: relative;
-  padding: 12px 20px;
+  padding: 10px 10px;
   font-size: 14px;
-  background-color: #06c069;
+  background-color: white;
   color: white;
   border: none;
   border-radius: 4px;
@@ -166,23 +166,24 @@ tbody td:first-child {
     box-shadow 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
 }
 
 .export-as-btn:hover {
-  background-color: #049665;
+  background-color: white;
   box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
 }
 
 .export-as-btn:focus {
   outline: none;
-  background-color: #06c069;
-  box-shadow: 0 0 5px rgb(0 255 145 / 50%);
+  background-color: white;
+  /* box-shadow: 0 0 5px rgb(0 255 145 / 50%); */
 }
 
 .export-as-btn i {
   margin-left: 8px;
   font-size: 18px;
+  color: #007bff;
 }
 
 .export-dropdown-menu {
@@ -192,7 +193,7 @@ tbody td:first-child {
   left: 0;
   z-index: 1;
   background-color: white;
-  min-width: 140px;
+  min-width: 60px;
   box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
   border-radius: 4px;
   padding: 4px 0;
@@ -206,10 +207,11 @@ tbody td:first-child {
 
 .export-dropdown-menu option {
   color: #333;
-  padding: 10px 20px;
+  padding: 5px 5px;
   text-decoration: none;
   display: block;
   transition: background-color 0.3s ease;
+  font-weight: bolder;
 }
 
 .export-dropdown-menu option:hover {
@@ -219,9 +221,8 @@ tbody td:first-child {
 
 .export-history-popup {
   position: absolute;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 10%;
+  left: 55%;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -234,7 +235,7 @@ tbody td:first-child {
 .export-history-btn {
   padding: 10px 15px;
   font-size: 16px;
-  background-color: #007bff;
+  background-color: white;
   color: white;
   border: none;
   border-radius: 4px;
@@ -242,11 +243,10 @@ tbody td:first-child {
   transition:
     background-color 0.3s,
     transform 0.2s;
-  margin-left: 10px;
 }
 
 .export-history-btn:hover {
-  background-color: #0056b3;
+  background-color: white;
   transform: translateY(-1px);
 }
 
@@ -257,6 +257,7 @@ tbody td:first-child {
 
 .export-history-btn i {
   margin-right: 5px;
+  color: black;
 }
 
 .export-history-list {

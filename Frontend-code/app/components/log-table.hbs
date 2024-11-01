@@ -2,24 +2,25 @@
   <thead>
     <tr>
       <th>Time Generated</th>
-      <th class ="sortable-header">
-        Event Category
+      
+      <th class="sortable-header">
+        Event ID
         <div class="sort-buttons">
-          <button class="sort-button up" {{on "click" (fn this.sortColumn "event_category" "asc")}}>
+          <button class="sort-button up" type="button" {{on "click" (fn this.sortColumn "event_id" "asc")}}>
             <i class="fa-solid fa-angle-up"></i>
           </button>
-          <button class="sort-button down" {{on "click" (fn this.sortColumn "event_category" "desc")}}>
+          <button class="sort-button down" type="button" {{on "click" (fn this.sortColumn "event_id" "desc")}}>
             <i class="fa-solid fa-angle-down"></i>
           </button>
         </div>
       </th>
-      <th class="sortable-header">
-        Event ID
+      <th class ="sortable-header">
+        Event Category
         <div class="sort-buttons">
-          <button class="sort-button up" {{on "click" (fn this.sortColumn "event_id" "asc")}}>
+          <button class="sort-button up" type="button" {{on "click" (fn this.sortColumn "event_category" "asc")}}>
             <i class="fa-solid fa-angle-up"></i>
           </button>
-          <button class="sort-button down" {{on "click" (fn this.sortColumn "event_id" "desc")}}>
+          <button class="sort-button down" type="button" {{on "click" (fn this.sortColumn "event_category" "desc")}}>
             <i class="fa-solid fa-angle-down"></i>
           </button>
         </div>
@@ -27,10 +28,10 @@
       <th class="sortable-header">
         Source
         <div class="sort-buttons">
-          <button class="sort-button up" {{on "click" (fn this.sortColumn "source" "asc")}}>
+          <button class="sort-button up" type="button" {{on "click" (fn this.sortColumn "source" "asc")}}>
             <i class="fa-solid fa-angle-up"></i>
           </button>
-          <button class="sort-button down" {{on "click" (fn this.sortColumn "source" "desc")}}>
+          <button class="sort-button down" type="button" {{on "click" (fn this.sortColumn "source" "desc")}}>
             <i class="fa-solid fa-angle-down"></i>
           </button>
         </div>
@@ -38,10 +39,10 @@
       <th class="sortable-header">
         Event type
         <div class="sort-buttons">
-          <button class="sort-button up" {{on "click" (fn this.sortColumn "event_type" "asc")}}>
+          <button class="sort-button up" type="button" {{on "click" (fn this.sortColumn "event_type" "asc")}}>
             <i class="fa-solid fa-angle-up"></i>
           </button>
-          <button class="sort-button down" {{on "click" (fn this.sortColumn "event_type" "desc")}}>
+          <button class="sort-button down" type="button" {{on "click" (fn this.sortColumn "event_type" "desc")}}>
             <i class="fa-solid fa-angle-down"></i>
           </button>
         </div>
@@ -71,10 +72,10 @@
       <th class="sortable-header">
         Record Number
         <div class="sort-buttons">
-          <button class="sort-button up" {{on "click" (fn this.sortColumn "record_number" "asc")}}>
+          <button class="sort-button up" type="button" {{on "click" (fn this.sortColumn "record_number" "asc")}}>
             <i class="fa-solid fa-angle-up"></i>
           </button>
-          <button class="sort-button down" {{on "click" (fn this.sortColumn "record_number" "desc")}}>
+          <button class="sort-button down" type="button" {{on "click" (fn this.sortColumn "record_number" "desc")}}>
             <i class="fa-solid fa-angle-down"></i>
           </button>
         </div>
@@ -85,8 +86,8 @@
     {{#each @logs as |log|}}
       <tr>
         <td>{{this.formatTimestamp log.time_generated}}</td>
-        <td>{{log.event_category}}</td>
         <td>{{log.event_id}}</td>
+        <td>{{log.event_category}}</td>
         <td>{{log.source}}</td> 
         <td>{{log.event_type}}</td> 
         {{!-- <td>{{log.hostname}}</td> 

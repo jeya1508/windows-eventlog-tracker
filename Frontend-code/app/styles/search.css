@@ -181,7 +181,7 @@ h2 {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; 
+  z-index: 1000;
 }
 
 .popup-overlay {
@@ -191,7 +191,7 @@ h2 {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 999; 
+  z-index: 999;
 }
 .popup-content {
   background-color: white;
@@ -256,8 +256,8 @@ h2 {
 }
 .sortable-header {
   position: relative;
-  padding-right: 30px; 
-  text-align: left; 
+  padding-right: 30px;
+  text-align: left;
 }
 
 .sort-buttons {
@@ -279,14 +279,14 @@ h2 {
 }
 
 .sort-button i {
-  font-size: 0.8rem; 
+  font-size: 0.8rem;
   color: #333;
 }
 
 .sort-button:hover i {
   color: #555;
 }
-.spinner i{
+.spinner i {
   display: flex;
   align-items: center;
   justify-content: center;

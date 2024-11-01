@@ -1,9 +1,10 @@
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import { service } from '@ember/service';
 
 export default class SessionService extends Service {
   @tracked isLoggedIn = false;
-
+  @service router;
   constructor() {
     super(...arguments);
     const storedIsLoggedIn = localStorage.getItem('isLoggedIn');
@@ -34,6 +35,7 @@ export default class SessionService extends Service {
         this.isLoggedIn = false;
         this.sessionId = null;
         localStorage.removeItem('isLoggedIn');
+        this.router.transitionTo('index');
       } else {
         console.error('Logout failed:', xhr.statusText);
       }

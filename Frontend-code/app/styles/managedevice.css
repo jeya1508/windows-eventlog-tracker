@@ -60,3 +60,6 @@ h2 {
   color: red;
   font-size: 14px;
 }
+.add-device-form input.error-outline {
+  border-color: red;
+}

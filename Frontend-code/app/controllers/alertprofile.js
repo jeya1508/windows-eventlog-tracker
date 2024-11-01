@@ -20,13 +20,54 @@ export default class AlertprofileController extends Controller {
   @action
   addAlertProfile(event) {
     event.preventDefault();
-    let { profileName, criteria, notifyEmail } = this.model;
 
+    const profileNameInput = document.getElementById('profileName');
+    const criteriaInput = document.getElementById('criteria');
+    const notifyEmailInput = document.getElementById('notifyEmail');
+
+    profileNameInput.classList.remove('error-outline');
+    criteriaInput.classList.remove('error-outline');
+    notifyEmailInput.classList.remove('error-outline');
+
+    let isFormValid = true;
+    let firstEmptyField = null;
+    if (!this.model.profileName) {
+      isFormValid = false;
+      profileNameInput.classList.add('error-outline');
+      if (!firstEmptyField) {
+        firstEmptyField = profileNameInput;
+      }
+    }
+    if (!this.model.criteria) {
+      isFormValid = false;
+      criteriaInput.classList.add('error-outline');
+      if (!firstEmptyField) {
+        firstEmptyField = criteriaInput;
+      }
+    }
+    if (!this.model.notifyEmail) {
+      isFormValid = false;
+      notifyEmailInput.classList.add('error-outline');
+      if (!firstEmptyField) {
+        firstEmptyField = notifyEmailInput;
+      }
+    }
+
+    if (firstEmptyField) {
+      alert('Fill all the fields');
+      firstEmptyField.focus();
+      return;
+    }
+
+    const isEditStatus = this.model.isEdit;
+    console.log(this.model.isEdit);
+    let { profileName, criteria, notifyEmail } = this.model;
     const xhr = new XMLHttpRequest();
-    const method = this.model.isEdit ? 'PUT' : 'POST';
-    const url = this.model.isEdit
-      ? `http://localhost:8500/servletlog/v1/alert/profile/${this.model.profileName}`
-      : 'http://localhost:8500/servletlog/v1/alert/profile';
+    const method = isEditStatus === true ? 'PUT' : 'POST';
+    const url =
+      isEditStatus === true
+        ? `http://localhost:8500/servletlog/v1/alert/profile/${this.model.profileName}`
+        : 'http://localhost:8500/servletlog/v1/alert/profile';
 
     xhr.open(method, url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -38,6 +79,7 @@ export default class AlertprofileController extends Controller {
         later(() => this.router.transitionTo('alerts'), 2000);
       } else if (xhr.status === 400 || xhr.status === 500) {
         this.errorMessage = response.error || 'Failed to save alert profile';
+        alert(this.errorMessage);
       } else {
         this.errorMessage = 'An unexpected error occurred';
       }

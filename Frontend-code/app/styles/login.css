@@ -1,3 +1,13 @@
+input.error {
+  border-color: #ff0000; /* Red border for errors */
+  box-shadow: 0 0 4px rgba(255, 0, 0, 0.5); /* Subtle red shadow */
+}
+
+input:focus {
+  border-color: #007bff; /* Blue border on focus */
+  outline: none;
+}
+
 .login-container {
   max-width: 400px;
   margin: 100px auto;
@@ -37,12 +47,6 @@ input {
   font-size: 16px;
 }
 
-input:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 4px rgb(0 123 255 / 25%);
-}
-
 .submit-btn {
   background-color: #28a745;
   color: white;
@@ -58,15 +62,11 @@ input:focus {
   background-color: #38ce5b;
 }
 
-.submit-btn:focus {
-  outline: none;
-}
-
 .google-signin-container {
   display: flex;
-  justify-content: center; /* Centers horizontally */
+  justify-content: center;
   align-items: center;
-  padding: 20px; /* Centers vertically */
+  padding: 20px;
 }
 
 .google-signin-btn {
@@ -82,6 +82,9 @@ input:focus {
 
 .google-signin-btn:hover {
   background-color: #9db4dd;
+}
+input.error-outline {
+  border-color: red;
 }
 
 .google-logo {

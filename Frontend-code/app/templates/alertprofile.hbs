@@ -3,19 +3,16 @@
   <form {{on "submit" this.addAlertProfile}} class="add-alert-form">
     <div class="form-group">
       <label for="profileName">Profile Name</label>
-      <input type="text" id="profileName" value={{this.model.profileName}} {{on "input" (fn this.updateField "profileName")}} disabled={{this.model.profileName}} placeholder="Enter a unique name" required>
+      <input type="text" id="profileName" value={{this.model.profileName}} {{on "input" (fn this.updateField "profileName")}} disabled={{this.model.profileName}} placeholder="Enter a unique name" >
     </div>
     <div class="form-group">
       <label for="criteria">Criteria</label>
-      <input type="text" id="criteria" value={{this.model.criteria}} {{on "input" (fn this.updateField "criteria")}} placeholder="Give a criteria (Example: event_id=1)" required>
+      <input type="text" id="criteria" value={{this.model.criteria}} {{on "input" (fn this.updateField "criteria")}} placeholder="Give a criteria (Example: event_id=1)">
     </div>
     <div class="form-group">
       <label for="notifyEmail">Email for notification</label>
-      <input type="email" id="notifyEmail" value={{this.model.notifyEmail}} {{on "input" (fn this.updateField "notifyEmail")}} placeholder="Give email to get notified for alerts" required>
+      <input type="email" id="notifyEmail" value={{this.model.notifyEmail}} {{on "input" (fn this.updateField "notifyEmail")}} placeholder="Give email to get notified for alerts">
     </div>
-    {{#if this.errorMessage}}
-      <div class="error-message">{{this.errorMessage}}</div>
-    {{/if}}
 <button type="submit" class="btn-submit">{{if this.model.profileName "Update profile" "Add profile"}}</button>
   </form>
   <div class="back-button-container">

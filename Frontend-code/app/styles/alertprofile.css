@@ -60,3 +60,6 @@ h2 {
   color: red;
   font-size: 14px;
 }
+.alert-profile-container input.error-outline {
+  border-color: red;
+}

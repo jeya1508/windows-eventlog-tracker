@@ -21,47 +21,6 @@
 
   <button class="filter-btn" type="button" {{on "click" this.applyFiltering}}>Filter</button>
 </div>
-<div class="export-buttons">
-  <button class="export-as-btn" type="button">
-    <i class="fa-solid fa-file-export"></i> Export as 
-    <span class="dropdown-arrow"></span>
-    <div class="export-dropdown-menu">
-      <option value="csv" {{on "click" this.exportAsCSV}}>CSV</option>
-    </div>
-  </button>
-  
-  <button class="export-history-btn" type="button" {{on "click" this.exportHistory}}>
-    <i class="fa-solid fa-file-arrow-down"></i>
-  </button>
-
-  {{#if this.isPopupVisible}}
-    <div class="export-history-popup">
-      <div class="export-history-list">
-        <div class="export-history-heading">
-          <p>Export History</p>
-          <button class="close-popup" type="button" {{on "click" this.closePopup}}>X</button>
-        </div>
-        
-        {{#if (eq this.exportHistoryData.length 0)}}
-          <p>No history available</p>  
-        {{else}}
-          <ul>
-            {{#each this.exportHistoryData as |export|}}
-              <li class="export-item">
-                <a href={{export.preSignedUrl}} target="_blank" rel="noopener noreferrer">{{export.fileName}}</a>
-                <button class="clear-file" type="button" {{on "click" (fn this.clearCSVFile export.fileName)}}>Clear</button>
-              </li>
-            {{/each}}
-          </ul>
-        {{/if}}
-      </div>
-      
-      {{#if this.exportHistoryData.length}}
-        <button class="clear-all-files-btn" type="button" {{on "click" this.clearAllFiles}}>Clear All</button>
-      {{/if}}
-    </div>
-  {{/if}}
-</div>
 {{#if this.isLoading}}
     <div class="spinner">
       <i class="fa-solid fa-spinner fa-spin"></i>

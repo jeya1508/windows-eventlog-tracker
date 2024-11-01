@@ -4,7 +4,8 @@
   <div class="select-device-logs">
     <p>Device</p>
     <select class ="device-select-dropdown" {{on "change" this.updateSelectedDevice}} >
-      <option value = ''>Select device</option>
+      {{!-- <option value = ''>Select device</option> --}}
+      <option value = ''>Local machine</option>
       {{#each this.devices as |device|}}
           <option value={{device}} >{{device}}</option>
       {{/each}}
@@ -21,8 +22,8 @@
         <select class="filter-category" {{on "change" this.updateSearchCategory}}>
           <option value="" selected>Search Category</option>
           <option value="event_id">Event ID</option>
-          <option value="username">Username</option>
-          <option value="hostname">Hostname</option>
+          {{!-- <option value="username">Username</option>
+          <option value="hostname">Hostname</option> --}}
           <option value="event_category">Event Category</option>
           <option value="source">Source</option>
           <option value="event_type">Event Type</option>
@@ -35,7 +36,7 @@
         <input type="text" placeholder="Enter value" class="filter-value" {{on "input" this.updateSearchField}}>
 
       </div>
-          <button class="submit-device-btn" type="button" {{on "click" this.applyFiltering}}>Submit</button>
+          <button class="submit-device-btn" type="button" {{on "click" this.applyFiltering}}>Search</button>
           <button class="cancel-btn" type="button" {{on "click" this.closeDeviceSelection}}>Cancel</button>
         </div>
       </div>

@@ -1,13 +1,10 @@
+// routes/dashboard.js
 import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
 
 export default class DashboardRoute extends Route {
   @service session;
   @service router;
-
-  setupController(controller) {
-    super.setupController(...arguments);
-  }
 
   beforeModel() {
     if (!this.session.isLoggedIn) {
@@ -17,19 +14,22 @@ export default class DashboardRoute extends Route {
 
   afterModel() {
     if (this.session.isLoggedIn) {
-      window.history.replaceState(null, '', window.location.href);
-      window.addEventListener('popstate', this.handlePopState.bind(this));
+      window.history.replaceState(null, '', '/dashboard');
+      
+      window.history.pushState(null, '', '/dashboard');
+
+      window.addEventListener('popstate', this.handlePopState);
     }
   }
 
   willDestroy() {
-    window.removeEventListener('popstate', this.handlePopState.bind(this));
+    // Clean up the event listener to avoid memory leaks
+    window.removeEventListener('popstate', this.handlePopState);
   }
 
-  handlePopState(event) {
+  handlePopState = (event) => {
     if (this.session.isLoggedIn) {
-      window.history.replaceState(null, '', window.location.href);
-      this.router.transitionTo('dashboard');
+      window.history.pushState(null, '', '/dashboard');
     }
-  }
+  };
 }

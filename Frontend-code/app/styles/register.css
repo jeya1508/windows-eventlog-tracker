@@ -32,6 +32,10 @@ h2 {
   font-size: 14px;
 }
 
+.register-form input.error-outline {
+  border-color: red;
+}
+
 .register-form .btn-submit {
   width: 100%;
   padding: 10px;

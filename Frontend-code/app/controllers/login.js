@@ -9,9 +9,11 @@ export default class LoginController extends Controller {
 
   @tracked email = '';
   @tracked password = '';
+
   constructor() {
     super(...arguments);
   }
+
   @action
   updateEmail(event) {
     this.email = event.target.value;
@@ -25,6 +27,34 @@ export default class LoginController extends Controller {
   @action
   submitLogin(event) {
     event.preventDefault();
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    emailInput.classList.remove('error-outline');
+    passwordInput.classList.remove('error-outline');
+
+    let isFormValid = true;
+    let firstEmptyField = null;
+    if (!this.email) {
+      isFormValid = false;
+      emailInput.classList.add('error-outline');
+      if (!firstEmptyField) {
+        firstEmptyField = emailInput;
+      }
+    }
+
+    if (!this.password) {
+      isFormValid = false;
+      passwordInput.classList.add('error-outline');
+      if (!firstEmptyField) {
+        firstEmptyField = passwordInput;
+      }
+    }
+    if (firstEmptyField) {
+      alert('Fill all the fields');
+      firstEmptyField.focus();
+      return;
+    }
 
     let loginData = {
       email: this.email,
@@ -59,8 +89,43 @@ export default class LoginController extends Controller {
     };
     xhr.send(JSON.stringify(loginData));
   }
+
   @action
   signInWithGoogle() {
-    window.location.href = 'http://localhost:8500/servletlog/v1/user/login';
+    const oauthUrl = 'http://localhost:8500/servletlog/v1/user/login';
+
+    const popupWidth = 500;
+    const popupHeight = 500;
+    const left = (window.screen.width / 2) - (popupWidth / 2);
+    const top = (window.screen.height / 2) - (popupHeight / 2);
+
+    const popup = window.open(
+      oauthUrl,
+      'Google Sign-In',
+      `width=${popupWidth},height=${popupHeight},top=${top},left=${left}`
+    );
+
+    const popupCheckInterval = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(popupCheckInterval);
+        return;
+      }
+
+      try {
+        const popupUrl = popup.location.href;
+        const url = new URL(popupUrl);
+        const sessionId = url.searchParams.get('sessionId');
+
+        if (sessionId) {
+          clearInterval(popupCheckInterval);
+          popup.close();
+
+          this.session.setSessionId(sessionId);
+          this.session.login();
+          this.router.transitionTo('dashboard');
+        }
+      } catch (error) {
+      }
+    }, 500);
   }
 }

@@ -7,7 +7,6 @@ export default class LogTableComponent extends Component {
   }
   @action
   sortColumn(column, order) {
-    // Call the action from the controller to handle sorting
     if (typeof this.args.sortLogs === 'function') {
       this.args.sortLogs(column, order);
     }
