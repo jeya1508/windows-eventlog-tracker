@@ -104,6 +104,7 @@ public class AlertProfileServlet extends HttpServlet {
         }
         catch (Exception e)
         {
+            logger.error("Error in adding the alert profile {}",e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Alert profile adding failed");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

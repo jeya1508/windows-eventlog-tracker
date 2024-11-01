@@ -1,15 +1,11 @@
 package org.logging.controller;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.logging.config.ElasticSearchConfig;
 import org.logging.entity.DeviceInfo;
-import org.logging.entity.LogInfo;
 import org.logging.exception.ValidationException;
 import org.logging.repository.ElasticSearchRepository;
 import org.logging.service.DeviceService;
-import org.logging.service.ElasticSearchService;
 import org.logging.service.LoggingService;
 import org.logging.service.ValidationService;
 import org.slf4j.Logger;
@@ -72,10 +68,10 @@ public class DeviceServlet extends HttpServlet
     }
 
     private void getLogsFromDevices(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String deviceName = request.getParameter("deviceName");
+        String deviceName = (request.getParameter("deviceName")!=null || request.getParameter("deviceName").isEmpty()) ? request.getParameter("deviceName"):null;
         DeviceInfo deviceInfo = deviceService.getDeviceFromDeviceName(deviceName);
-
-        LoggingService.collectWindowsLogs(deviceInfo.getIpAddress(),deviceInfo.getHostName(),deviceInfo.getPassword());
+        elasticSearchServlet.init();
+        LoggingService.collectWindowsLogs(deviceInfo);
         elasticSearchServlet.handleGetAllLogs(request,response);
     }
 
@@ -104,10 +100,10 @@ public class DeviceServlet extends HttpServlet
 
             String deviceName = jsonNode.get("deviceName").asText();
             String ipAddress = jsonNode.get("ipAddress").asText();
-            String hostName = jsonNode.get("hostName").asText();
+            String userName = jsonNode.get("userName").asText();
             String password = jsonNode.get("password").asText();
 
-            String result = deviceService.addDeviceToFile(deviceName,ipAddress, hostName, password);
+            String result = deviceService.addDeviceToFile(deviceName,ipAddress, userName, password);
 
             Map<String, String> successResponse = new HashMap<>();
             successResponse.put("message", result);

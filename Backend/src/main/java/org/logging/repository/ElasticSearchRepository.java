@@ -15,10 +15,11 @@ import java.util.Map;
 public class ElasticSearchRepository {
     private static final ElasticsearchClient client = ElasticSearchConfig.createElasticsearchClient();
     private static  final Logger logger = LoggerFactory.getLogger(ElasticSearchRepository.class);
-    public static String getLastIndexedRecordNumber() {
+    public static String getLastIndexedRecordNumber(String deviceName) {
+        String indexName = (deviceName == null) ? "windows-logs" : "windows-logs-"+deviceName;
         try {
             SearchResponse<Map> searchResponse = client.search(s -> s
-                            .index("windows-logs")
+                            .index(indexName)
                             .sort(sort -> sort.field(f -> f.field("record_number.keyword").order(SortOrder.Desc)))  // Sort by record_number in descending order
                             .size(1),
                     Map.class
@@ -38,6 +39,7 @@ public class ElasticSearchRepository {
     public long getTotalRecords(String indexName) throws Exception {
         CountRequest countRequest = CountRequest.of(c -> c.index(indexName));
         CountResponse countResponse = client.count(countRequest);
+        logger.debug("Total is {}",countResponse.count());
         return countResponse.count();
     }
 

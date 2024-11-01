@@ -7,7 +7,7 @@ public class EventLogCollector {
         System.load("C:\\Users\\hp\\Documents\\GitHub\\windows-eventlog-tracker\\LogDLL\\x64\\Debug\\LogDLL.dll");
     }
 
-    public native Map<String, String>[] collectWindowsLogs(String ipAddress, String hostName, String password, long lastRecordNumber);
+    public native Map<String, String>[] collectWindowsLogs(String ipAddress, String userName, String password, long lastRecordNumber);
 
     public static void main(String[] args) {
         EventLogCollector collector = new EventLogCollector();

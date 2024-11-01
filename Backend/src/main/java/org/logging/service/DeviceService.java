@@ -23,7 +23,7 @@ public class DeviceService {
     private static final ValidationService validationService = new ValidationService();
     private static final Logger logger = LoggerFactory.getLogger(DeviceService.class);
 
-    public String addDeviceToFile(String deviceName,String ipAddress,String hostName, String password) throws IOException, ValidationException {
+    public String addDeviceToFile(String deviceName,String ipAddress,String userName, String password) throws IOException, ValidationException {
         List<String> deviceNames = getAllDeviceName();
         if(!deviceNames.contains(deviceName))
         {
@@ -35,7 +35,7 @@ public class DeviceService {
         else{
             throw new ValidationException("Device name already exists");
         }
-        String textToAppend = deviceName+","+ipAddress+","+hostName+","+password+"\n";
+        String textToAppend = deviceName+","+ipAddress+","+userName+","+password+"\n";
         Path path = Paths.get(FILE_PATH);
         if(Files.exists(path))
         {

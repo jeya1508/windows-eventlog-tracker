@@ -59,14 +59,14 @@ public class ElasticSearchServlet extends HttpServlet {
     }
 
     public void handleGetAllLogs(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-        long totalRecords = 0;
-        int pageSize = Integer.parseInt(req.getParameter("pageSize") != null ? req.getParameter("pageSize") : "10");
+        long totalRecords = 0 ;
+        int pageSize = Integer.parseInt(req.getParameter("pageSize") != null  ? req.getParameter("pageSize") : "10");
         String searchAfterParam = req.getParameter("searchAfter");
         String[] searchAfter = searchAfterParam!=null ? searchAfterParam.split(","): null;
 
-        String deviceName = req.getParameter("deviceName") !=null ?req.getParameter("deviceName"):null;
+        String deviceName = (req.getParameter("deviceName") !=null)?req.getParameter("deviceName"):null;
         logger.info("Device name is {}", deviceName);
-        DeviceInfo deviceInfo = (deviceName == null) ? null: deviceService.getDeviceFromDeviceName(deviceName) ;
+        DeviceInfo deviceInfo = (deviceName == null || deviceName.isEmpty()) ? null: deviceService.getDeviceFromDeviceName(deviceName) ;
         logger.info("Device info is {}",deviceInfo);
 
         String sortBy = req.getParameter("sortBy");
@@ -74,8 +74,8 @@ public class ElasticSearchServlet extends HttpServlet {
 
         List<LogInfo> logs = elasticSearchService.getAllLogs(deviceInfo, pageSize, searchAfter,sortBy,sortOrder);
         logger.info("Logs are {}",logs);
-
-        String indexName = (deviceName == null) ? "windows-logs" : "windows-logs-"+deviceName;
+        logger.debug("Device is {}",deviceName);
+        String indexName = (deviceName == null || deviceName.isEmpty()) ? "windows-logs" : "windows-logs-"+deviceName;
         if(elasticSearchService.isIndexExists(indexName)) {
              totalRecords = elasticSearchRepository.getTotalRecords(indexName);
         }

@@ -1,2 +1,3 @@
-device-1,10.94.72.92,hp,Jeya@1234
+device-1,10.94.73.12,hp,Jeya@1234
 192.168.1.41,192.168.1.41,dell,Sample@1234
+jeyashree system,10.94.72.92,jeyashree\hp,1234

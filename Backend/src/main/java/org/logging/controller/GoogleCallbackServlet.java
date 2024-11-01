@@ -69,7 +69,9 @@ public class GoogleCallbackServlet extends HttpServlet {
 
             response.sendRedirect("http://localhost:4200/login?sessionId=" + session.getId());
         } else {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Authorization code is missing");
+            logger.error("Authorization code is missing");
+//            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Authorization code is missing");
+            response.sendRedirect("http://localhost:4200/login");
         }
     }
     private String exchangeCodeForToken(String code) throws IOException {

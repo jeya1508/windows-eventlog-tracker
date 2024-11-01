@@ -165,7 +165,7 @@ public class AlertRetrievalServlet extends HttpServlet {
         String[] searchAfter = searchAfterParam != null ? searchAfterParam.split(",") : null;
         try {
             List<AlertInfo> logs = alertRetrievalService.getAllAlerts(pageSize, searchAfter);
-            long totalRecords = elasticSearchRepository.getTotalRecords("alerts");
+            long totalRecords = elasticSearchRepository.getTotalRecords("alerts-index");
             Map<String, Object> result = new HashMap<>();
             result.put("logs", logs);
             result.put("totalRecords", totalRecords);

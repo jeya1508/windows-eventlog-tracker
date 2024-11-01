@@ -21,19 +21,21 @@ public class LogConsumer implements Runnable {
     private final Set<String> triggeredProfiles = new HashSet<>();
     private final ElasticSearchUtil elasticSearchUtil = new ElasticSearchUtil();
 
-    private static final int LOGS_BATCH_SIZE = 2000;
-    private static final int ALERT_BATCH_SIZE = 1000;
+    private static final int LOGS_BATCH_SIZE = 100;
+    private static final int ALERT_BATCH_SIZE = 100;
 
     private final AtomicBoolean isDone;
+    private final String deviceName;
 
     private static final Logger logger = LoggerFactory.getLogger(LogConsumer.class);
 
-    public LogConsumer(CircularBlockingQueue<Map<String, String>> queue, List<AlertProfile> alertProfiles, AtomicBoolean isDone) {
+    public LogConsumer(CircularBlockingQueue<Map<String, String>> queue, List<AlertProfile> alertProfiles, String deviceName,AtomicBoolean isDone) {
         this.queue = queue;
         this.alertProfiles = alertProfiles;
         this.buffer = new ArrayList<>();
         this.alertBuffer = new ArrayList<>();
         this.isDone = isDone;
+        this.deviceName = deviceName;
     }
 
     static CloseableRecordTracker recordTracker;
@@ -57,26 +59,22 @@ public class LogConsumer implements Runnable {
                 try {
                     Map<String, String> log = queue.consume();
                     Thread.sleep(1000);
-                    if (log == null) {
+                    if (log != null) {
+                        logsToProcess.add(log);
+                        logger.debug("Size of logToProcess is {}",logsToProcess.size());
+                        logger.info("Log added to process batch: {}", log);
+                    } else {
                         if (isDone.get()) {
-                            logger.info("Producer is done, finalizing processing...");
-                            try {
-                                finalizeProcessing();
-                            } catch (IOException e) {
-                                logger.error("Error during final processing: {}", e.getMessage());
-                            }
-                            return;
+                            logger.info("Producer is done, no more logs to consume. Processing final batch...");
+                            break;
                         }
-                        break;
                     }
-                    logsToProcess.add(log);
-                }
-                catch (InterruptedException e)
-                {
+                } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
-
+            logger.debug("Logs reached the Buffer size");
+            logger.debug("Size of logToProcess is {}",logsToProcess.size());
             for (Map<String, String> log : logsToProcess) {
                 try {
                     processLog(log);
@@ -91,8 +89,9 @@ public class LogConsumer implements Runnable {
     }
 
     private void processLog(Map<String, String> log) throws MessagingException {
+        logger.debug("Into the process logs");
         buffer.add(log);
-
+        logger.info("Buffer size is {}",buffer.size() + "and the device is "+deviceName);
         if (buffer.size() >= LOGS_BATCH_SIZE) {
             logger.info("Buffer reached {} logs. Indexing...", LOGS_BATCH_SIZE);
             indexBufferedLogs();
@@ -105,15 +104,30 @@ public class LogConsumer implements Runnable {
 
         if (!buffer.isEmpty()) {
             logger.info("Finalizing and indexing remaining {} logs (windows-logs)...", buffer.size());
-            LoggingService.indexLogsToElasticSearch(buffer, "windows-logs");
+
+            if(deviceName == null) {
+                logger.info("Indexing remaining {} logs to Elasticsearch (windows-logs)...", buffer.size());
+                LoggingService.indexLogsToElasticSearch(buffer, "windows-logs");
+            }
+            else{
+                logger.info("Indexing remaining {} logs ", buffer.size()+"to Elasticsearch (windows-logs-"+deviceName+")...");
+                LoggingService.indexLogsToElasticSearch(buffer,"windows-logs-"+deviceName);
+            }
             recordTracker.updateRecordNumber(Long.parseLong(buffer.getLast().get("record_number")));
             recordTracker.writeRecordNumberToFile();
             buffer.clear();
         }
 
         if (!alertBuffer.isEmpty()) {
-            logger.info("Finalizing and indexing remaining {} alert logs (alerts-index)...", alertBuffer.size());
-            LoggingService.indexLogsToElasticSearch(alertBuffer, "alerts-index");
+            if(deviceName == null) {
+                logger.info("Finalizing and indexing remaining {} alert logs (alerts-index)...", alertBuffer.size());
+                LoggingService.indexLogsToElasticSearch(alertBuffer, "alerts-index");
+            }
+            else{
+                logger.info("Finalizing and indexing remaining {}", alertBuffer.size()+" alert logs (alerts-index"+deviceName+")...");
+
+                LoggingService.indexLogsToElasticSearch(alertBuffer,"alerts-index-"+deviceName);
+            }
             alertBuffer.clear();
         }
 
@@ -122,9 +136,16 @@ public class LogConsumer implements Runnable {
 
     private void indexBufferedLogs() {
         if (!buffer.isEmpty()) {
-            logger.info("Indexing {} logs to Elasticsearch (windows-logs)...", buffer.size());
+
             try {
-                LoggingService.indexLogsToElasticSearch(buffer, "windows-logs");
+                if(deviceName == null) {
+                    logger.info("Indexing {} logs to Elasticsearch (windows-logs)...", buffer.size());
+                    LoggingService.indexLogsToElasticSearch(buffer, "windows-logs");
+                }
+                else{
+                    logger.info("Indexing {} logs ", buffer.size()+"to Elasticsearch (windows-logs-"+deviceName+")...");
+                    LoggingService.indexLogsToElasticSearch(buffer,"windows-logs-"+deviceName);
+                }
                 recordTracker.updateRecordNumber(Long.parseLong(buffer.getLast().get("record_number")));
                 recordTracker.writeRecordNumberToFile();
             } catch (Exception e) {
@@ -158,7 +179,12 @@ public class LogConsumer implements Runnable {
 
         if (alertBuffer.size() >= ALERT_BATCH_SIZE) {
             logger.info("Alert buffer reached {} logs. Indexing alert logs...", ALERT_BATCH_SIZE);
-            LoggingService.indexLogsToElasticSearch(alertBuffer, "alerts-index");
+            if(deviceName == null) {
+                LoggingService.indexLogsToElasticSearch(alertBuffer, "alerts-index");
+            }
+            else{
+                LoggingService.indexLogsToElasticSearch(alertBuffer,"alerts-index-"+deviceName);
+            }
             alertBuffer.clear();
         }
     }

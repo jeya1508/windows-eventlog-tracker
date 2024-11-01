@@ -114,7 +114,7 @@ public class CircularBlockingQueue<T> implements Serializable {
 
                     if (deserializedArray.length > 0) {
                         int toConsume = Math.min(capacity - consumerSize, deserializedArray.length);
-                        logger.info("Deserialized {} items from file.", toConsume);
+                        //logger.info("Deserialized {} items from file.", toConsume);
 
                         for (int i = 0; i < toConsume; i++) {
                             consumerQueue[consumerRear] = deserializedArray[i];

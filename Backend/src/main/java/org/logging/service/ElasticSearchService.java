@@ -10,6 +10,7 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import co.elastic.clients.elasticsearch.indices.GetIndexRequest;
@@ -33,56 +34,58 @@ public class ElasticSearchService {
         this.validationService = validationService;
     }
     public List<LogInfo> getAllLogs(DeviceInfo deviceInfo, int pageSize, String[] searchAfter, String sortBy, String sortOrder) throws Exception {
-
         String sortField = (sortBy != null && !sortBy.isEmpty()) ? elasticSearchUtil.getSortField(sortBy) : "time_generated";
         SortOrder sortingOrder = ("desc".equalsIgnoreCase(sortOrder) || sortOrder == null) ? SortOrder.Desc : SortOrder.Asc;
+        String deviceName = (deviceInfo != null) ? deviceInfo.getDeviceName() : null;
+        String indexName = (deviceName == null) ? "windows-logs" : "windows-logs-" + deviceName;
 
-        String deviceName = (deviceInfo!=null) ? deviceInfo.getDeviceName() : null;
-        String indexName = (deviceName == null )? "windows-logs" : "windows-logs-"+deviceName;
-        logger.info("Is index exists {}",isIndexExists(indexName));
-        if(isIndexExists(indexName))
-        {
-            SearchRequest searchRequest = SearchRequest.of(builder -> {
-                builder.index(indexName)
-                        .size(pageSize)
-                        .sort(sort -> sort.field(f -> f.field(sortField).order(sortingOrder)))
-                        .sort(sort -> sort.field(f -> f.field("_seq_no").order(sortingOrder)));
+        if (!isIndexExists(indexName)) {
+            logger.error("Index does not exist: {}", indexName);
+            return Collections.emptyList(); // Handle missing index gracefully
+        }
 
-                if (searchAfter != null && searchAfter.length > 0) {
-                    List<FieldValue> searchAfterValues = Arrays.stream(searchAfter)
-                            .map(val -> validationService.isNumeric(val) ? FieldValue.of(Long.parseLong(val)) : FieldValue.of(val))
-                            .collect(Collectors.toList());
+        logger.info("Preparing search for index: {}, sortField: {}, sortOrder: {}, pageSize: {}", indexName, sortField, sortingOrder, pageSize);
 
-                    builder.searchAfter(searchAfterValues);
+        SearchRequest searchRequest = SearchRequest.of(builder -> {
+            builder.index(indexName)
+                    .size(pageSize)
+                    .sort(sort -> sort.field(f -> f.field(sortField).order(sortingOrder)))
+                    .sort(sort -> sort.field(f -> f.field("_seq_no").order(sortingOrder)));
 
-                }
+            if (searchAfter != null && searchAfter.length > 0) {
+                List<FieldValue> searchAfterValues = Arrays.stream(searchAfter)
+                        .map(val -> validationService.isNumeric(val) ? FieldValue.of(Long.parseLong(val)) : FieldValue.of(val))
+                        .collect(Collectors.toList());
+                builder.searchAfter(searchAfterValues);
+            }
 
-                return builder;
-            });
+            return builder;
+        });
 
+        try {
             SearchResponse<LogInfo> searchResponse = elasticsearchClient.search(searchRequest, LogInfo.class);
+            if (searchResponse == null || searchResponse.hits().hits().isEmpty()) {
+                logger.warn("No hits found for index: {}", indexName);
+                return Collections.emptyList();
+            }
 
             return searchResponse.hits().hits().stream()
                     .map(hit -> {
                         LogInfo logInfo = hit.source();
                         if (logInfo != null) {
-                            Object[] sortValues = Arrays.stream(hit.sort().toArray())
-                                    .map(fieldValue -> {
-                                        if (fieldValue instanceof FieldValue) {
-                                            return ((FieldValue) fieldValue)._get();
-                                        }
-                                        return fieldValue;
-                                    }).toArray();
-                            logInfo.setSortValues(sortValues);
+                            logInfo.setSortValues(Arrays.stream(hit.sort().toArray())
+                                    .map(fieldValue -> (fieldValue instanceof FieldValue) ? ((FieldValue) fieldValue)._get() : fieldValue)
+                                    .toArray());
                         }
                         return logInfo;
                     })
                     .collect(Collectors.toList());
-        }
-        else{
-            return null;
+        } catch (Exception e) {
+            logger.error("Error executing search for index {}: {}", indexName, e.getMessage());
+            throw e;
         }
     }
+
 
     public boolean isIndexExists(String indexName) {
         boolean exists = false;

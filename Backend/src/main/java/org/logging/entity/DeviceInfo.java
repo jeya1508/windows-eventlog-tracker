@@ -12,6 +12,6 @@ import lombok.Setter;
 public class DeviceInfo {
     String deviceName;
     String ipAddress;
-    String hostName;
+    String userName;
     String password;
 }
